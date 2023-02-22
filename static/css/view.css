@@ -1,0 +1,19 @@
+h1 {
+	width:		100%;
+  	font-weight:lighter;
+  	font-size: 	60px;
+  	text-align: center;
+}
+#bottomMessage{ font-size: 20px; text-align: center; font-weight: lighter; }
+
+img{background: none; vertical-align: middle;}
+
+div#notes{padding: 20px; max-width: 500px; margin: 0px auto;}
+
+.programName {
+	font-size: 30px;
+	font-family: Serif;
+	font-style: italic;
+}
+
+img#Logo{width: 200px;}

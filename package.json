@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "google-closure-compiler": "^20230103.0.0",
+    "google-closure-library": "^20230206.0.0"
+  }
+}
