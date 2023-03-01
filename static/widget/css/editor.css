@@ -48,9 +48,9 @@ div#design-recipe-form div.section{
 	background:		left top no-repeat;
 }
 
-div#design-recipe-form div.section#design-recipe-contract{background-image: url('contract.png')}
-div#design-recipe-form div.section#design-recipe-examples{background-image: url('examples.png')}
-div#design-recipe-form div.section#design-recipe-definition{background-image: url('code.png'); border-bottom: 0px;}
+div#design-recipe-form div.section#design-recipe-contract{background-image: url('/static/img/contract.png')}
+div#design-recipe-form div.section#design-recipe-examples{background-image: url('/static/img/examples.png')}
+div#design-recipe-form div.section#design-recipe-definition{background-image: url('/static/img/code.png'); border-bottom: 0px;}
 div#design-recipe-form div.section>span{vertical-align: middle;}
 
 

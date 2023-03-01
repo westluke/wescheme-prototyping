@@ -60,7 +60,7 @@ h1, h2, #Navigation, #FileControls, #ProgramControls *, #defn, #inter, input{
 #Navigation{
     width:           100%;
     min-height:      40px;
-    background:     url(/css/images/icon-trans.png) 4px 4px black;
+    background:     url(/static/img/icon-trans.png) 4px 4px black;
     background-size: 40px 40px;
     background-repeat:no-repeat;
     clear:           both;
@@ -124,12 +124,12 @@ a.h2:hover{text-decoration: underline;}
   background-position: 15px 0px;
 }
 
-a#run    span:before{content: url(run.png);    margin-right: 3px;}
-a#stop   span:before{content: url(break.png);  margin-right: 3px;}
-a#save   span:before{content: url(save.png);   margin-right: 3px;}
-a#share  span:before{content: url(share.png);  margin-right: 3px;}
-a#recipe span:before{content: url(recipe.png); margin-right: 3px;}
-a#images span:before{content: url(icon_images.gif); margin-right: 3px;}
+a#run    span:before{content: url(/static/img/run.png);    margin-right: 3px;}
+a#stop   span:before{content: url(/static/img/break.png);  margin-right: 3px;}
+a#save   span:before{content: url(/static/img/save.png);   margin-right: 3px;}
+a#share  span:before{content: url(/static/img/share.png);  margin-right: 3px;}
+a#recipe span:before{content: url(/static/img/recipe.png); margin-right: 3px;}
+a#images span:before{content: url(/static/img/icon_images.gif); margin-right: 3px;}
 
 #ProgramControls li a, #ProgramControls li a:visited{
     display:		block;
@@ -180,10 +180,10 @@ a#images span:before{content: url(icon_images.gif); margin-right: 3px;}
     width:			100%;
     height:			100%;
     overflow:		auto;
-    background:		white url(/css/images/fadeIcon.png) no-repeat right bottom;
+    background:		white url(/static/img/fadeIcon.png) no-repeat right bottom;
     font-family:	Monaco, sans-serif;
 }
-#defn:hover{background:	white url(/css/images/fadeWords.png) no-repeat right bottom;}
+#defn:hover{background:	white url(/static/img/fadeWords.png) no-repeat right bottom;}
 
 
 /* INTERACTIONS */
@@ -192,14 +192,14 @@ a#images span:before{content: url(icon_images.gif); margin-right: 3px;}
     clear:          both;
     width:          100%;
     height:         50%;
-    background:		white url(images/blank.gif) no-repeat;
+    background:		white url(/static/img/blank.gif) no-repeat;
     overflow:       auto;
     margin-left:    4px;
     padding-top:    2px;
 }
 
 #interactions:hover{
-    background:	white url(/css/images/interactions.png) no-repeat right bottom;}
+    background:	white url(/static/img/interactions.png) no-repeat right bottom;}
 
 #inter {
     width:         100%;

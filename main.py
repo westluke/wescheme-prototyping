@@ -1,16 +1,14 @@
-# import datetime
-
-from flask import Flask, render_template, request, Response
+from flask import Flask, render_template, request, Response, session, redirect
 from google.cloud import datastore
 from google.oauth2 import id_token
 from google.auth.transport import requests
-import datetime
+from datetime import datetime as datetime
 
-# from google.auth.transport import requests
-# from google.cloud import datastore
-# import google.oauth2.id_token
 
 app = Flask(__name__)
+app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
+
+client = datastore.Client("wescheme-prototyping")
 
 # datastore_client = datastore.Client()
 # firebase_request_adapter = requests.Request()
@@ -27,25 +25,7 @@ def get_mime(fp):
 
 @app.route("/")
 def root():
-    # client = datastore.Client("wescheme-prototyping")
-
-    # # key is one where Datastore will automatically generate an Id
-    # key = client.key("Task")
-
-    # # Create an unsaved Entity object, and tell Datastore not to index the
-    # # `description` field
-    # task = datastore.Entity(key, exclude_from_indexes=("description",))
-
-    # # Apply new field values and save the Task entity to Datastore
-    # task.update(
-    #     {
-    #         "created": datetime.datetime.now(tz=datetime.timezone.utc),
-    #         "description": "asldhj",
-    #         "done": False,
-    #     }
-    # )
-    # client.put(task)
-    return render_template("index.html.jinja")
+    return render_template("index.html.jinja", logged_in=('idinfo' in session))
 
 @app.route("/codemirror5/<path:cm_filepath>")
 def get_cm_file(cm_filepath):
@@ -59,27 +39,19 @@ def get_goog_file(goog_filepath):
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    # print(request.method)
-    # print(request.form)
+
     print(request.cookies)
-    print(request)
-    # if request.cookies.get("g_csrf_token"))
-    # Firefox seems to be blocking the g_csrf_token. Not sure how to prevent that at the moment.
-    # Need to narrow it down more.
-    idinfo = id_token.verify_oauth2_token(request.form['g_csrf_token'], requests.Request(), "239382796313-gr5fodbdqpb7uotgpffrdelkgna1gqel.apps.googleusercontent.com")
-    print(idinfo)
+    print(request.form)
 
-    # If it authenticates, issue session.
-    # If authentication fails, try to do alternative authentication???
-    # The alternative authentication doesn't make much sense, don't do that.
+    try:
+        idinfo = id_token.verify_oauth2_token(request.form['credential'], requests.Request(), "239382796313-gr5fodbdqpb7uotgpffrdelkgna1gqel.apps.googleusercontent.com")
+        session['idinfo'] = idinfo
+        print(idinfo)
+    except Exception as e:
+        print(f"verification failed! exception: {e}")
 
+    return redirect("/")
 
-    return ""
-    # if (request.method == 'POST'):
-        
-        
-    
-    
 # @app.route("/about")
 # def about():
 #     # print("HEREERREREE")
@@ -95,9 +67,59 @@ def viewmaker(page):
 for page in ["about", "contact", "privacy", "copyright"]:
     app.add_url_rule("/" + page, endpoint=page, view_func=viewmaker(page))
 
-@app.route("/open-editor")
+@app.route("/openEditor")
 def open_editor():
-    return render_template("open-editor.html.jinja")
+    flags=[]
+    ctx={}
+
+    if 'idinfo' in session:
+        flags.append('logged_in')
+        ctx['name'] = session['idinfo']['name']
+
+    if 'publicId' in request.args:
+        flags.append('remix')
+        ctx['public_id'] = request.args['publicId']
+
+    return render_template("open-editor.html.jinja", flags=flags, ctx=ctx)
+
+@app.route("/saveProject", methods=["POST"])
+def save_project():
+    # Need to do token double submission stuff to guard against CSRF, check SaveProjectServlet
+
+    if not 'idinfo' in session:
+        return ""
+
+    # This key is incomplete, Datastore will automatically generate an Id upon insertion
+    key = client.key("Program")
+
+    # Emmanuel needs to enable the Firestore API, tell him that tmrw.
+
+    form = request.form
+    print(form)
+
+    prog = datastore.Entity(key)
+    prog.update({
+        'title': request.form['title'],
+        'code': request.form['code'],
+        'token': request.form['token'],
+        'after_luke': True,
+        'public': True,
+        'deleted': False,
+        'srcs': [],
+        'owner': session['idinfo']['name'],
+        'time': datetime.now(),
+        'published': False,
+        'backlink': "",
+        'mostRecentShare': datetime.now(),
+        'notes': ""
+    })
+
+    client.put(prog)
+    return ""
+
+@app.route("/console")
+def console():
+    return render_template("open-editor.html.jinja", flags=flags, ctx=ctx)
 
 @app.route("/clone-project")
 def clone_project():
@@ -117,10 +139,6 @@ def list_projects():
 
 @app.route("/load-project")
 def load_project():
-    pass
-
-@app.route("/save-project")
-def save_project():
     pass
 
 @app.route("/share-project")
@@ -151,10 +169,6 @@ def addFeedback():
 
 @app.route("/view")
 def view():
-    pass
-
-@app.route("/console")
-def console():
     pass
 
 @app.route("/logout")
