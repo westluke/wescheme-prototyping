@@ -99,6 +99,12 @@
 
           userName = "{% if 'logged_in' in flags %}{{ ctx['name'] }}{% endif %}"
 
+          {% if 'pid' in flags %}
+            pid = decodeURIComponent("{{ ctx['pid'] }}")
+          {% elif 'publicId' in flags %}
+            publicId = decodeURIComponent("{{ ctx['publicId'] }}")
+          {% endif %}
+
           isEmbedded = false; // expose it on the JavaScript side too.
 
               initializeEditor({userName: userName,

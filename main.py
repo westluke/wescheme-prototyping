@@ -5,10 +5,12 @@ from google.auth.transport import requests
 from datetime import timedelta, UTC, datetime as datetime
 
 import random
+import time
 import xml.etree.ElementTree as ET
 
 BASE_62_CHARS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ";
-PROGRAM_KIND = 'Program'
+KEY_FILE = "secretkey"
+GMAIL_EXT = "@gmail.com"
 KEY_LENGTH = 10
 CLIENT_ID = "239382796313-gr5fodbdqpb7uotgpffrdelkgna1gqel.apps.googleusercontent.com"
 PROJECT_ID = "wescheme-prototyping"
@@ -21,21 +23,21 @@ app = Flask(__name__)
 # Generate new random keys with:
 # $ python -c 'import secrets; print(secrets.token_hex())'
 def load_secret_key():
-    with open('secretkey', 'r') as f:
+    with open(KEY_FILE, 'r') as f:
         app.secret_key = f.read()
 
 load_secret_key()
 
 # Returns (formatted_email, nickname)
 def format_email(email):
-    if "@gmail.com" not in email:
-        new_email = email + "@gmail.com"
+    if GMAIL_EXT not in email:
+        new_email = email + GMAIL_EXT
     return (new_email, email)
 
 def genkey():
     while True:
-        publicId = "".join(random.choices(BASE_62_CHARS, k=KEY_LENGTH).join())
-        query = client.query(kind=PROGRAM_KIND)
+        publicId = "".join(random.choices(BASE_62_CHARS, k=KEY_LENGTH))
+        query = client.query(kind='Program')
         query.add_filter('publicId_', '=', publicId)
         query_iter = query.fetch(limit=1)
 
@@ -45,7 +47,7 @@ def genkey():
         if not projs: return publicId
 
 def get_program_by_id(id_num):
-    return client.get(client.Key(PROGRAM_KIND, id_num))
+    return client.get(client.Key('Program', id_num))
 
 def get_mime(fp):
     if fp.endswith(".css"):
@@ -62,7 +64,7 @@ def logged_in():
     ret = (('id_info' in session)
         and ('datetime' in session)
         and (session['datetime'] < now)
-        and (now - session['datetime'] < timedelta(seconds=60)))
+        and (now - session['datetime'] < timedelta(seconds=300)))
     if not ret: session.clear()
     return ret
 
@@ -112,6 +114,10 @@ def open_editor():
     if 'publicId' in request.args:
         flags.append('remix')
         ctx['public_id'] = request.args['publicId']
+
+    if 'pid' in request.args:
+        flags.append('pid')
+        ctx['pid'] = request.args['pid']
 
     return render_template("open-editor.html.jinja", flags=flags, ctx=ctx)
 
@@ -166,30 +172,38 @@ def save_project():
         return ""
 
     # Make a key that's guaranteed unique
-    prog_key = client.key("Program")
-    src_key = client.key("SourceCode")
+    prog_key = client.key('Program')
+    prog = datastore.Entity(prog_key)
 
     form = request.form
-    prog = datastore.Entity(key)
+    email, nickname = format_email(session['id_info']['email'])
+    publicId = genkey()
 
     prog.update({
-        'author_': format_email(session['id_info']['email']),
+        'author_': email,
         'backlink_': "",
         'isDeleted': False,
         'isSourcePublic': False,
         'mostRecentShare_': 0,
-        'owner_': format_email(session['id_info']['email']),
-        'publicId_': 0,
+        'owner_': email,
+        'publicId_': publicId,
         'published_': False,
-        'time_': datetime.now(),
+        'time_': time.time() * 1000,
         'title_': form['title']
     })
 
-    # 'title_': form['title'],
-    # 'code': form['code'],
-    # 'token': form['token'],
-
+    # At this point, prog_key is completed with an actual id
     client.put(prog)
+
+    src_key = client.key('Program', prog.key.id, "SourceCode")
+    src = datastore.Entity(src_key)
+
+    src.update({
+        'name': form['title'],
+        'src_': form['code']
+    })
+
+    client.put(src)
     return ""
 
 # Verify token!!!
@@ -248,19 +262,45 @@ def image_proxy():
 """
 
 def program_digest_from_entity(e):
-    dig = ET.Element("ProgramDigest")
-    id_xml = ET.Element("id")
-    id_xml = "FILLER"
-    # id_xml.text = e.id
+    dig = ET.Element('ProgramDigest')
+    id_xml = ET.Element('id')
+    id_xml.text = str(e.key.id)
+    publicId_xml = ET.Element('publicId')
+    publicId_xml.text = e['publicId_']
+    title_xml = ET.Element('title')
+    title_xml.text = e['title_']
+    owner_xml = ET.Element('owner')
+    owner_xml.text = e['owner_']
+    author_xml = ET.Element('author')
+    author_xml.text = e['author_']
+    modified_xml = ET.Element('modified')
+    modified_xml.text = str(e['time_'])
+    published_xml = ET.Element('published')
+    published_xml.text = e['published_']
+    sharedAs_xml = ET.Element('sharedAs')
+    dig.extend([
+        id_xml,
+        publicId_xml,
+        title_xml,
+        owner_xml,
+        author_xml,
+        modified_xml,
+        published_xml,
+        sharedAs_xml
+    ])
+    return dig
 
 # Ok there is both ObjectCode and SourceCode. Which one is right?????
 @app.route("/listProjects")
 def list_projects():
     # Nope this doesn't work because these aren't the primary keys. Fuck. This has to be a query.
-    # key = client.Key(PROGRAM_KIND, "danny.yoo@gmail.com")
+    # key = client.Key('Program', "danny.yoo@gmail.com")
 
-    query = client.query(kind=PROGRAM_KIND)
-    query.add_filter('author_', '=', "Luke West")
+    if not logged_in():
+        return ""
+
+    query = client.query(kind='Program')
+    query.add_filter('author_', '=', format_email(session['id_info']['email'])[0])
     query.order = ['-time_']
     query_iter = query.fetch(limit=BATCH_SIZE)
 
@@ -268,24 +308,16 @@ def list_projects():
     projs = list(page)
     next_cursor = query_iter.next_page_token
 
-    xml = ET.Element("ProgramDigests")
+    digs = ET.Element("ProgramDigests")
     for proj in projs:
-        
+        digs.append(program_digest_from_entity(proj))
 
-    print(projs)
+    # return ET.tostring(digs)
+    return Response(ET.tostring(digs), mimetype="text/xml")
 
-    # How to store cursor?
-    # Also, if I'm reading the java source correctly, users ccan only have a maximum of 20 programs?????
     # Other missing things I just noticed:
     # I need to add back in documentation
     # I need to make sure requires can bring in the teachpacks like they do in the original.
-    # Need to make sure that the program examples work.
-
-
-    # oh wait fuck right, they are actually using the default, automatically-generated keys.
-
-    # Convert to json
-    return projs
 
 @app.route("/load-project")
 def load_project():
