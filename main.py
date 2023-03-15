@@ -1,76 +1,54 @@
-from flask import Flask, render_template, request, Response, session, redirect
+import flask
 from google.cloud import datastore
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from datetime import timedelta, UTC, datetime as datetime
+import requests as py_requests
 
+from util import client
+from program import *
+from sourcecode import *
+
+import json
 import random
-import time
 import xml.etree.ElementTree as ET
 
-BASE_62_CHARS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ";
-KEY_FILE = "secretkey"
-GMAIL_EXT = "@gmail.com"
-KEY_LENGTH = 10
-CLIENT_ID = "239382796313-gr5fodbdqpb7uotgpffrdelkgna1gqel.apps.googleusercontent.com"
-PROJECT_ID = "wescheme-prototyping"
-BATCH_SIZE = 100
-
-client = datastore.Client(PROJECT_ID)
-random.seed()
-app = Flask(__name__)
-
-# Generate new random keys with:
-# $ python -c 'import secrets; print(secrets.token_hex())'
-def load_secret_key():
-    with open(KEY_FILE, 'r') as f:
-        app.secret_key = f.read()
-
 load_secret_key()
+random.seed()
 
-# Returns (formatted_email, nickname)
-def format_email(email):
-    if GMAIL_EXT not in email:
-        new_email = email + GMAIL_EXT
-    return (new_email, email)
+# Gets overridden if this file is executed directly, which should only happen in debugging
+debug=False
 
-def genkey():
-    while True:
-        publicId = "".join(random.choices(BASE_62_CHARS, k=KEY_LENGTH))
-        query = client.query(kind='Program')
-        query.add_filter('publicId_', '=', publicId)
-        query_iter = query.fetch(limit=1)
-
-        page = next(query_iter.pages)
-        projs = list(page)
-
-        if not projs: return publicId
-
-def get_program_by_id(id_num):
-    return client.get(client.Key('Program', id_num))
-
-def get_mime(fp):
-    if fp.endswith(".css"):
-        return "text/css"
-    elif fp.endswith(".js"):
-        return "text/javascript"
-    elif fp.endswith(".html.jinja") or fp.endswith(".html"):
-        return "text/html"
-    else:
-        return "text/plain"
-
+# Returns True iff session cookies demonstrate a sufficiently recent, valid session.
+# If False, session is invalid, and therefore cleared.
 def logged_in():
     now = datetime.now(UTC)
-    ret = (('id_info' in session)
+    ret = (('fname' in session)
         and ('datetime' in session)
         and (session['datetime'] < now)
-        and (now - session['datetime'] < timedelta(seconds=300)))
+        and (now - session['datetime'] < timedelta(seconds=60*60*24)))  # Sessions last 1 day, max
     if not ret: session.clear()
     return ret
 
+@app.route("/favicon.ico")
+def favicon():
+    with app.open_resource(f"static/img/favicon.ico", 'rb') as f:
+        return Response(f.read(), mimetype="image/vnd.microsoft.icon")
+
+@app.route("/doc/<path:comp>")
+def docs(comp):
+    with app.open_resource(f"doc/{comp}", 'r') as f:
+        return Response(f.read(), mimetype=get_mime(comp))
+
+def viewmaker(page):
+    return lambda: render_template(page + ".html.jinja")
+
+for page in ["about", "contact", "privacy", "copyright"]:
+    app.add_url_rule("/" + page, endpoint=page, view_func=viewmaker(page))
+
 @app.route("/")
 def root():
-    return render_template("index.html.jinja", logged_in=logged_in())
+    return render_template("index.html.jinja", logged_in=logged_in(), debug=debug)
 
 @app.route("/codemirror5/<path:cm_filepath>")
 def get_cm_file(cm_filepath):
@@ -82,25 +60,53 @@ def get_goog_file(goog_filepath):
     with app.open_resource(f"node_modules/google-closure-library/{goog_filepath}", 'r') as f:
         return Response(f.read(), mimetype=get_mime(goog_filepath))
 
+@app.route("/js/mzscheme-vm/<path:rest>")
+def get_js(rest):
+    return redirect("/static/mzscheme-vm/" + rest)
+    
+@app.route("/logout", methods=["GET"])
+def logout():
+    session.clear()
+    def callback(resp):
+        resp.delete_cookie('g_csrf_token')
+        resp.delete_cookie('token')
+        return resp
+
+    flask.after_this_request(callback)
+    return redirect("/")
+
 @app.route("/login", methods=["GET", "POST"])
-#Need to carry around an encrypted id token, but how
 def login():
-    print(request.cookies)
-    print(request.form)
     try:
+        print(request.cookies)
+        # csrf_token_cookie = request.cookies.get('g_csrf_token')
+        # if not csrf_token_cookie:
+        #     return errasdlfjasdlfahldfh
+        # csrf_token_body = request.args.get('g_csrf_token')
+        # if not csrf_token_body:
+        #     asldahjdsf
+        # if csrf_token_cookie != csrf_token_body:
+        #     doublesubmitmismatch
         id_info = id_token.verify_oauth2_token(request.form['credential'], requests.Request(), CLIENT_ID)
-        session['id_info'] = id_info
+
+        # fname is formatted email - formatted in the weird way that the legacy wescheme backend did it
+        session['fname'], session['nickname'] = format_email(id_info['email'])
         session['datetime'] = datetime.now(UTC)
-        print(id_info)
+
+        def callback(resp):
+            print("ran callback")
+            resp.delete_cookie('g_csrf_token')
+            resp.set_cookie('token', randtoken())
+            return resp
+
+        # When the response gets made, set a randomized token for CSRF defense.
+        flask.after_this_request(callback)
+
     except Exception as e:
         print(f"verification failed! exception: {e}")
     return redirect("/")
 
-def viewmaker(page):
-    return lambda: render_template(page + ".html.jinja")
-
-for page in ["about", "contact", "privacy", "copyright"]:
-    app.add_url_rule("/" + page, endpoint=page, view_func=viewmaker(page))
+# Shit. Missing sharedAs field in listProjects xml
 
 @app.route("/openEditor")
 def open_editor():
@@ -109,11 +115,11 @@ def open_editor():
 
     if logged_in():
         flags.append('logged_in')
-        ctx['name'] = session['id_info']['name']
+        ctx['name'] = session['nickname']
 
     if 'publicId' in request.args:
         flags.append('remix')
-        ctx['public_id'] = request.args['publicId']
+        ctx['publicId'] = request.args['publicId']
 
     if 'pid' in request.args:
         flags.append('pid')
@@ -121,259 +127,256 @@ def open_editor():
 
     return render_template("open-editor.html.jinja", flags=flags, ctx=ctx)
 
-# Need to do token double submission stuff to guard against CSRF, check SaveProjectServlet
-# Emmanuel needs to enable the Firestore API, tell him that tmrw.
-# Firestore in datastore mode
-# Just use prototyping project I already have
-# Get saving/loading of programs done 
-# Ok the java impl treats names really weirdly. Realyl really weirdly. So be careful to match that exactly, even though it's bad.
-# Ok so it's using the java builtins (HTTPResponse) to set cookies, but it has its own methods for retrieving them, which doesn't make much sense, but fine.
-# I need to make sure I can retrieve all past saved programs, and be able to handle every kind of google sign-in.
-# But that's not too bad actually.
-# Only tricky case should be with custom domains, right. I mean, that impl sucks for so many reasons, but I can manage it...
-# Actually wait, since deleted google email addresses can never be reused there shouldn't be any danger, right?
-# Yeah, no, just preserve the behavior
-# It's SourceCode we need, not ObjectCode. I think ObjectCode is useless now.
-# In the Java, the SourceCode list in Program is automatically populated due to ancestry relationships
-# Ugh ok they're duplicating work. Both the publicId and the primary key id are unique. whyyyyyy
-# Alright well now, I need to know the format the site is expcting for program xml.
-# Ok well the xml is just from the Program, not SourceCode. so that part's easy.
-# Oh and LoadProject returns JSON bc of course it does why the fuck not
-# Yeah no ObjectCode unused, Emmanuel removed it like 8 years ago.
-# Copying and pasting sample responses for litsprojects and loadprojects:
+# True iff request was POST and POST'd token matches cookie'd token
+def is_intentional():
+    return (('token' in request.form)
+        and ('token' in request.cookies)
+        and (request.form['token'] == request.cookies['token']))
 
-'''
+def save_existing_program():
+    form = request.form
+    pid = int(form['pid'])
+    extant = Program.from_id(pid)
 
-{
-    "owner":"luke_west@alumni.brown.edu@gmail.com",
-    "isSourcePublic":false,
-    "notes":"",
-    "author":"luke_west@alumni.brown.edu@gmail.com",
-    "source":
-        {
-            "src":"(define x \"This is Program 0\")\n(display x)",
-            "name":"Unknown"
-        },
-    "published":false,
-    "title":"prog0",
-    "permissions":[],
-    "provides":[],
-    "modified":1677714854460,
-    "id":6556339543736320,
-    "sharedAs":[],
-    "publicId":"PHDTctEsLh"
-}
+    if extant.owner == session['fname'] and (not extant.published):
+        if 'title' in form: extant.title = form['title']
+        if 'code' in form: extant.code = form['code']
+        if 'notes' in form: extant.notes = form['notes']
+        if extant.publicId is None: extant.publicId = Program.gen_publicId()
+        extant.upload()
 
-'''
+    #TODO: throw error if not allowed
+    return Response(str(pid), mimetype="text/plain")
 
+def save_new_program():
+    form = request.form
+    prog = Program(
+        title=form['title'],
+        author=session['fname'],
+        owner=session['fname'],
+        notes=form['notes'] if 'notes' in form else None)
+
+    prog.upload()
+    src_key = client.key(*prog.key.flat_path, "SourceCode")
+    src = SourceCode(
+        src_key,
+        form['title'],
+        form['code']
+    )
+    src.upload()
+    return Response(str(prog.key.id), mimetype="text/plain")
+
+# Save requests need to respond with resulting id
 @app.route("/saveProject", methods=["POST"])
 def save_project():
-    if not logged_in():
+    if not logged_in() or not is_intentional():
         return ""
 
-    # Make a key that's guaranteed unique
-    prog_key = client.key('Program')
-    prog = datastore.Entity(prog_key)
-
-    form = request.form
-    email, nickname = format_email(session['id_info']['email'])
-    publicId = genkey()
-
-    prog.update({
-        'author_': email,
-        'backlink_': "",
-        'isDeleted': False,
-        'isSourcePublic': False,
-        'mostRecentShare_': 0,
-        'owner_': email,
-        'publicId_': publicId,
-        'published_': False,
-        'time_': time.time() * 1000,
-        'title_': form['title']
-    })
-
-    # At this point, prog_key is completed with an actual id
-    client.put(prog)
-
-    src_key = client.key('Program', prog.key.id, "SourceCode")
-    src = datastore.Entity(src_key)
-
-    src.update({
-        'name': form['title'],
-        'src_': form['code']
-    })
-
-    client.put(src)
-    return ""
-
-# Verify token!!!
-  # String passedToken = request.getParameter("idtoken");
-
-  #  // The Console page requires a login: if you come in without the right
-  #  // credentials, let's bump them to the login page.
-  #  SessionManager sm = new SessionManager(); 
-  #  Session s = sm.authenticate(request, response);
-  #  if( s == null ) {
-  #      UserService us = UserServiceFactory.getUserService();
-  #      // Not logged in: we should send them off to the login page.
-  #      response.sendRedirect(us.createLoginURL("/login.jsp?idtoken="+passedToken));
-  #  } else {
-
+    if "pid" in request.form:
+        return save_existing_program()
+    else:
+        return save_new_program()
 
 @app.route("/console")
 def console():
     if not logged_in():
-        return render_template("error.html.jinja", msg="You need to log in to access this page!")
+        return render_template("error.html.jinja", msg="You need to log in to access this page!", dst="/")
 
     flags=['logged_in']
-    ctx={'name': session['id_info']['name']}
-
-    if 'publicId' in request.args:
-        flags.append('remix')
-        ctx['public_id'] = request.args['publicId']
+    ctx={'name': session['nickname']}
 
     return render_template("console.html.jinja", flags=flags, ctx=ctx)
 
-@app.route("/clone-project")
+# The way sharing works is it first sends a request here, to make a cloned version of the program.
+# This request returns the pid of that clone, and then the site sends another request, to shareProject,
+# to actually publish the clone. Kinda funky.
+@app.route("/cloneProject", methods=["POST"])
 def clone_project():
-    pass
+    if not logged_in() or not is_intentional():
+        return ""
 
-@app.route("/delete-project")
+    pid = int(request.form['pid'])
+    old = Program.from_id(pid)
+
+    if old.owner != session['fname'] and (not old.published):
+        # TODO: handle this error appropriately
+        return ""
+
+    cloned = Program(
+        title=old.title,
+        backlink=old.key.id,
+        notes=old.notes,
+        mod_time=old.mod_time
+    )
+
+    cloned.upload()
+    old.mostRecentShare = cloned.key.id
+
+    old_src = SourceCode.from_parent(old.key)
+
+    cloned_src = SourceCode(
+        client.key(*cloned.key.flat_path, "SourceCode"),
+        name=old_src.name,
+        src=old_src.src
+    )
+
+    if 'code' in request.form:
+        cloned_src.src = request.form['code']
+
+    cloned_src.upload()
+
+    return Response(str(cloned.key.id), mimetype="text/plain")
+
+@app.route("/deleteProject", methods=["POST"])
 def delete_project():
-    pass
+    if not logged_in() or not is_intentional():
+        return ""
 
-@app.route("/image-proxy")
+    form = request.form
+    prog = Program.from_id(int(form['pid']))
+
+    if (prog.owner != session['fname']):
+        return ""
+
+    prog.isDeleted = True
+    prog.upload()
+    return ""
+
+@cache.memoize(300)
+def get_img(url):
+    return py_requests.get(url).content
+
+@app.route("/imageProxy")
 def image_proxy():
-    pass
+    print(request.args)
+    url = request.args['url']
+    print(url)
+    return Response(get_img(url), mimetype="image/png")
 
-"""
-<ProgramDigests>
-    <ProgramDigest>
-        <id>6556339543736320</id>
-        <publicId>PHDTctEsLh</publicId>
-        <title>prog0</title>
-        <owner>luke_west@alumni.brown.edu@gmail.com</owner>
-        <author>luke_west@alumni.brown.edu@gmail.com</author>
-        <modified>1677714854460</modified>
-        <published>false</published>
-        <sharedAs />
-    </ProgramDigest>
-</ProgramDigests>
-"""
-
-def program_digest_from_entity(e):
-    dig = ET.Element('ProgramDigest')
-    id_xml = ET.Element('id')
-    id_xml.text = str(e.key.id)
-    publicId_xml = ET.Element('publicId')
-    publicId_xml.text = e['publicId_']
-    title_xml = ET.Element('title')
-    title_xml.text = e['title_']
-    owner_xml = ET.Element('owner')
-    owner_xml.text = e['owner_']
-    author_xml = ET.Element('author')
-    author_xml.text = e['author_']
-    modified_xml = ET.Element('modified')
-    modified_xml.text = str(e['time_'])
-    published_xml = ET.Element('published')
-    published_xml.text = e['published_']
-    sharedAs_xml = ET.Element('sharedAs')
-    dig.extend([
-        id_xml,
-        publicId_xml,
-        title_xml,
-        owner_xml,
-        author_xml,
-        modified_xml,
-        published_xml,
-        sharedAs_xml
-    ])
-    return dig
-
-# Ok there is both ObjectCode and SourceCode. Which one is right?????
 @app.route("/listProjects")
 def list_projects():
-    # Nope this doesn't work because these aren't the primary keys. Fuck. This has to be a query.
-    # key = client.Key('Program', "danny.yoo@gmail.com")
-
     if not logged_in():
         return ""
 
-    query = client.query(kind='Program')
-    query.add_filter('author_', '=', format_email(session['id_info']['email'])[0])
-    query.order = ['-time_']
-    query_iter = query.fetch(limit=BATCH_SIZE)
-
-    page = next(query_iter.pages)
-    projs = list(page)
-    next_cursor = query_iter.next_page_token
-
+    projs = Program.list(session['fname'])
     digs = ET.Element("ProgramDigests")
     for proj in projs:
-        digs.append(program_digest_from_entity(proj))
+        if not proj.isDeleted:
+            digs.append(proj.to_xml())
 
-    # return ET.tostring(digs)
     return Response(ET.tostring(digs), mimetype="text/xml")
 
-    # Other missing things I just noticed:
-    # I need to add back in documentation
-    # I need to make sure requires can bring in the teachpacks like they do in the original.
+def prog_src_to_json(prog, src):
+    src_dict = {}
+    src_dict['src'] = src.src
+    src_dict['name'] = src.name
 
-@app.route("/load-project")
+    ret = {}
+    ret['owner'] = prog.owner
+    ret['isSourcePublic'] = prog.isSourcePublic
+    ret['notes'] = prog.notes if prog.notes is not None else ""
+    ret['author'] = prog.author
+    ret['source'] = src_dict
+    ret['published'] = prog.published
+    ret['title'] = prog.title
+    ret['permissions'] = []
+    ret['modified'] = prog.mod_time
+    ret['id'] = prog.key.id
+    ret['publicId'] = prog.publicId
+
+    sharedAs = prog.get_backlinked_progs()
+    def toEntry(prog):
+        d = {}
+        d['publicId'] = prog.publicId
+        d['title'] = prog.title
+        d['modified'] = prog.time
+        return d
+
+    ret['sharedAs'] = list(map(toEntry, sharedAs))
+    return json.dumps(ret)
+
+# TODO:
+#     make error pages for logged_out, wrong_user, etc.
+
+@app.route("/loadProject")
 def load_project():
-    pass
+    if 'pid' in request.args:
+        if not logged_in():
+            return ""
+        prog = Program.from_id(int(request.args['pid']))
+        if prog.owner != session['fname']:
+            return ""
+        src = SourceCode.from_parent(prog.key)
+        resp = prog_src_to_json(prog, src)
+        return Response(resp, mimetype="text/json")
 
-@app.route("/share-project")
+    # ITS CUZ SHARED STUFF DOESNT HAVE NEW SOURCE CODES
+
+    elif 'publicId' in request.args:
+        prog = Program.from_publicId(request.args['publicId'])
+        if not prog.isSourcePublic:
+            if not logged_in():
+                return ""
+            elif prog.owner != session['fname']:
+                return ""
+        src = SourceCode.from_parent(prog.key)
+        resp = prog_src_to_json(prog, src)
+        return Response(resp, mimetype="text/json")
+
+    else:
+        return BadRequest(description="Requests to loadProject must include either 'pid' or 'publicId' in GET parameters")
+
+@app.route("/shareProject", methods=['POST'])
 def share_project():
-    pass
+    if not logged_in() or not is_intentional():
+        print("attempted share, but not logged in or detected CSRF")
+        return ""
 
+    prog = Program.from_id(int(request.form['pid']))
 
+    if (prog.owner != session['fname']) or prog.published:
+        print("attempted share, but wrong user")
+        return ""
 
-"""
-
-Potentially unnecessary according to Emmanuel
-
-@app.route("/administrate")
-def administrate():
-    pass
-
-@app.route("/run")
-def run():
-    pass
-
-@app.route("/dumpFeedback")
-def dumpFeedback():
-    pass
-
-@app.route("/addFeedback")
-def addFeedback():
-    pass
+    print(request.form)
+    public = request.form['isPublic'] == 'true'
+    prog.published = True
+    prog.isSourcePublic = public
+    prog.time = epoch_time()
+    prog.upload()
+    return Response(ET.tostring(prog.to_xml()), mimetype="text/xml")
 
 @app.route("/view")
 def view():
-    pass
+    if 'publicId' not in request.args:
+        return Response(render_template("view.html.jinja", publicId=None, prog=None), status=400)
 
-@app.route("/logout")
-def logout():
-    pass
+    publicId = request.args['publicId']
+    prog = Program.from_publicId(publicId)
+    notes = prog.notes if prog.notes is not None else "\n"
 
-@app.route("/heartbeat")
-def heartbeat():
-    pass
+    return Response(
+        render_template(
+            "view.html.jinja",
+            publicId=publicId, prog=prog,
+            title=prog.title, notes=notes, isPublic=prog.isSourcePublic))
 
-@app.route("/createUser")
-def createUser():
-    pass
+@app.route("/run")
+def run():
+    if 'publicId' not in request.args:
+        return Response(render_template("run.html.jinja", publicId=None, prog=None), status=400)
 
-@app.route("/remoteAPI")
-def remoteAPI():
-    pass
+    publicId = request.args['publicId']
+    prog = Program.from_publicId(publicId)
+    print(prog.notes)
+    notes = prog.notes if prog.notes is not None else "\n"
 
-@app.route("/keyServer")
-def keyServer():
-    pass
-"""
-            
+    return Response(
+        render_template(
+            "run.html.jinja",
+            publicId=publicId, prog=prog,
+            title=prog.title, notes=notes, isPublic=prog.isSourcePublic))
+
 if __name__ == "__main__":
     # This is used when running locally only. When deploying to Google App
     # Engine, a webserver process such as Gunicorn will serve the app. This
@@ -382,4 +385,5 @@ if __name__ == "__main__":
     # the "static" directory. See:
     # http://flask.pocoo.org/docs/1.0/quickstart/#static-files. Once deployed,
     # App Engine itself will serve those files as configured in app.yaml.
+    debug=True
     app.run(host="127.0.0.1", port=8080, debug=True, use_evalex=False)

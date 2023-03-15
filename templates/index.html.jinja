@@ -75,13 +75,16 @@
             <img src="/static/img/BigLogo.png" alt="">
 
             <a class="button" id="loginButton" aria-describedby="loginDescription" href="javascript: void(0)">
-                <span class="tooltip" id="loginDescription">...to access your programs</span>
 
                 <div id="g_id_onload"
                     data-client_id="239382796313-gr5fodbdqpb7uotgpffrdelkgna1gqel.apps.googleusercontent.com"
                     data-context="signin"
                     data-ux_mode="redirect"
-                    data-login_uri="http://localhost:8080/login"
+                    {% if debug %}
+                        data-login_uri="http://localhost:8080/login"
+                    {% else %}
+                        data-login_uri="https://wescheme-prototyping.nn.r.appspot.com/login"
+                    {% endif %}
                     data-nonce=""
                     data-auto_prompt="false">
                 </div>
@@ -94,6 +97,8 @@
                     data-size="large"
                     data-logo_alignment="left">
                 </div>
+
+                <span class="tooltip" id="loginDescription">...to access your programs</span>
             </a>
         </div>
     {% endif %}

@@ -1,0 +1,21 @@
+[x] Figure out: does gcloud need the node_modules or env folders?
+ui issue with button
+
+[x] cloning
+[x] sharing
+[x] imageProxy
+[x] deletion
+
+
+[??????????] Make sure google's CSRF token makes it through the login process
+[x] Connect the static documentation site
+[x] Implement automatic session extension??? 
+4. Fill in a couple missing icons
+5. Run selenium test suite
+6. Deploying to wescheme-hrd-2
+7. (Ideally) fix build scripts
+
+
+
+JUST THIS CRITICAL PATH REMAINS!!!!!!!!
+debugging/manual testing

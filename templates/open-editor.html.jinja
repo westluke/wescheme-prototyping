@@ -101,7 +101,7 @@
 
           {% if 'pid' in flags %}
             pid = decodeURIComponent("{{ ctx['pid'] }}")
-          {% elif 'publicId' in flags %}
+          {% elif 'remix' in flags %}
             publicId = decodeURIComponent("{{ ctx['publicId'] }}")
           {% endif %}
 
