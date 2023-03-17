@@ -73,9 +73,9 @@ url:"/addFeedback",success:function(a){d()},error:function(a){d()},xhr:function(
 
 
 plt.config={};
-plt.config.APP_ID=injected_app_id;
-plt.config.CLIENT_ID=injected_client_id;
-plt.config.API_KEY=injected_api_key;
+plt.config.APP_ID="wescheme-hrd-2";
+plt.config.CLIENT_ID="981340394888-d28ji2vus7h06du2hgum27sf1mjs7ssm.apps.googleusercontent.com";
+plt.config.API_KEY="AIzaSyCP00M0rthRxOPCcaVHS54iO5WfNmNA2PU";
 
 
 goog.debug={};goog.debug.Error=function(a){this.stack=Error().stack||"";a&&(this.message=String(a))};goog.inherits(goog.debug.Error,Error);goog.debug.Error.prototype.name="CustomError";
@@ -705,6 +705,7 @@ this),c.actions.loadProject(a.pid,void 0,d,k);else if(a.publicId)plt.wescheme.We
 "100%";b.blur()}var b=document.getElementById("helpDialog");"25%"==b.style.top?a():(b.style.top="25%",b.focus(),document.getElementById("editor").setAttribute("aria-activedescendant",b.id));b.onclick=a};
 
 
+
 // Create and render a Google Picker object for selecting from Drive
 WeSchemeEditor.prototype.showPicker=function(a){
     
@@ -786,6 +787,7 @@ WeSchemeEditor.prototype.showPicker=function(a){
         tokenClient.requestAccessToken({prompt: ''});
     }
 }
+
 
 WeSchemeEditor.prototype.toggleScreenreader=function(){this.screenreader=!this.screenreader;this.interactions.say("screenreader features "+(this.screenreader?"on":"off"),!0)};WeSchemeEditor.prototype.getScreenreader=function(){return this.screenreader};WeSchemeEditor.prototype.cycleFocus=function(a){var b=this.focusCarousel.length,c=this.focusCarousel.find(function(a){return a.contains(document.activeElement)});
 c=this.focusCarousel.indexOf(c);a=this.focusCarousel[((c+(a?-1:1))%b+b)%b];document.activeElement.blur();document.getElementById("editor").setAttribute("aria-activedescendant",a.id);a.click();a.focus()};WeSchemeEditor.prototype.run=function(a){var b=this;if(!0===b.isRunning)return!1;b.isRunning=!0;plt.wescheme.WeSchemeIntentBus.notify("before-run",this);this.interactions.reset();this.interactions.runCode(this.defn.getCode(),"<definitions>",function(){b.isRunning=!1;plt.wescheme.WeSchemeIntentBus.notify("after-run",

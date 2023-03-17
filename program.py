@@ -30,9 +30,6 @@ class Program:
         '''
         prog_key = client.key('Program', pid)
         prog = client.get(prog_key)
-        print("in from_id")
-        print(prog_key)
-        print(prog)
         return Program.from_entity(prog)
 
     def from_publicId(publicId):
@@ -40,10 +37,8 @@ class Program:
         Pull Program stored in database with given publicId, which we also maintain as
         unique even though it isn't officially the primary key.
         '''
-        print(publicId)
         pub_q = client.query(kind='Program')
         pub_q.add_filter('publicId_', '=', publicId)
-        print(list(pub_q.fetch()))
 
         prog = list(pub_q.fetch())[0]
         return Program.from_entity(prog)
@@ -77,12 +72,10 @@ class Program:
             publicId=ent.get('publicId_'))
 
     def get_backlinked_progs(self):
-        if self.backlink is None: return []
+        # TODO: handle this err: if self.key.id is None: return []
         back_q = client.query(kind='Program')
-        back_q.add_filter('backlink_', '=', self.backlink)
+        back_q.add_filter('backlink_', '=', self.key.id)
         return list(map(lambda x: Program.from_entity(x), list(back_q.fetch())))
-        
-
 
     def to_entity(self):
         ent = datastore.Entity(self.key)
@@ -99,13 +92,16 @@ class Program:
         ent['published_'] = self.published
         return ent
 
+
+        # console needs idtoken, fix that
+        # shuold request access when you get to console?gt
+
     def upload(self):
         ent = self.to_entity()
         client.put(ent)
         self.key = ent.key
 
-    def to_xml(self):
-        dig = ET.Element('ProgramDigest')
+    def common_xml(self):
         id_xml = ET.Element('id')
         id_xml.text = str(self.key.id)
         publicId_xml = ET.Element('publicId')
@@ -121,10 +117,28 @@ class Program:
         published_xml = ET.Element('published')
         published_xml.text = "true" if self.published else "false"
         sharedAs_xml = ET.Element('sharedAs')
+        return {
+            'id': id_xml,
+            'publicId': publicId_xml,
+            'title': title_xml,
+            'owner': owner_xml,
+            'author': author_xml,
+            'modified': modified_xml,
+            'published': published_xml,
+            'sharedAs': sharedAs_xml
+        }
+
+    def to_xml_for_list(self):
+        dig = ET.Element('ProgramDigest')
+        common = self.common_xml()
         backlinked = self.get_backlinked_progs()
 
         def toEntry(prog):
             d = ET.Element('Entry')
+            return d
+
+        for prog in backlinked:
+            entry = ET.Element('Entry')
             publicId = ET.Element('publicId')
             publicId.text = prog.publicId
             title = ET.Element('title')
@@ -132,23 +146,17 @@ class Program:
             mod = ET.Element('modified')
             mod.text = str(prog.mod_time)
 
-            d.extend([publicId, title, mod])
-            return d
+            entry.extend([publicId, title, mod])
+            common['sharedAs'].append(entry)
 
-        for prog in backlinked:
-            sharedAs_xml.append(toEntry(prog))
-
-        dig.extend([
-            id_xml,
-            publicId_xml,
-            title_xml,
-            owner_xml,
-            author_xml,
-            modified_xml,
-            published_xml,
-            sharedAs_xml ])
-
+        dig.extend(common.values())
         return dig
+
+    def to_xml_for_share(self):
+        fake_dig = ET.Element('Program')
+        common = self.common_xml()
+        fake_dig.extend(common.values())
+        return fake_dig
         
     def list(author):
         '''

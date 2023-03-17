@@ -73,9 +73,9 @@ url:"/addFeedback",success:function(a){d()},error:function(a){d()},xhr:function(
 
 
 plt.config={};
-plt.config.APP_ID=injected_app_id;
-plt.config.CLIENT_ID=injected_client_id;
-plt.config.API_KEY=injected_api_key;
+plt.config.APP_ID="wescheme-prototyping";
+plt.config.CLIENT_ID="239382796313-gr5fodbdqpb7uotgpffrdelkgna1gqel.apps.googleusercontent.com";
+plt.config.API_KEY="AIzaSyDx3i-7tQtMquLGQvRdVCxIYZjrmPx986U";
 
 
 goog.debug={};goog.debug.Error=function(a){this.stack=Error().stack||"";a&&(this.message=String(a))};goog.inherits(goog.debug.Error,Error);goog.debug.Error.prototype.name="CustomError";

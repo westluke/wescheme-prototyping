@@ -16,8 +16,22 @@ import xml.etree.ElementTree as ET
 load_secret_key()
 random.seed()
 
-# Gets overridden if this file is executed directly, which should only happen in debugging
-debug=False
+"""
+Places where keys need to be changed: here (util.py)
+Inside openEditor-calc-min.js (extract if at all possible, for ease of change)
+Also need to transfer secretkey.
+"""
+
+
+def error_page(
+    msg="There was an error fulfilling your request! That's all we know.",
+    link=("homepage", "/"),
+    status=500
+):
+    return Response(
+        render_template("error.html.jinja", msg=msg, desc=link[0], url=link[1]),
+        status=status
+    )
 
 # Returns True iff session cookies demonstrate a sufficiently recent, valid session.
 # If False, session is invalid, and therefore cleared.
@@ -48,7 +62,11 @@ for page in ["about", "contact", "privacy", "copyright"]:
 
 @app.route("/")
 def root():
-    return render_template("index.html.jinja", logged_in=logged_in(), debug=debug)
+    return render_template(
+        "index.html.jinja",
+        logged_in=logged_in(),
+        client_id=CLIENT_ID,
+        site_url=SITE_URL)
 
 @app.route("/codemirror5/<path:cm_filepath>")
 def get_cm_file(cm_filepath):
@@ -78,23 +96,31 @@ def logout():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     try:
-        print(request.cookies)
+        # Google is not using SameSite attributes correctly, so I can't make the below code reliable.
         # csrf_token_cookie = request.cookies.get('g_csrf_token')
         # if not csrf_token_cookie:
-        #     return errasdlfjasdlfahldfh
+        #     return error_page(
+        #         msg="The WeScheme server didn't receive the CSRF token cookie from Google. Try relaxing your cookie privacy settings.",
+        #         status=400)
         # csrf_token_body = request.args.get('g_csrf_token')
         # if not csrf_token_body:
-        #     asldahjdsf
+        #     return error_page(
+        #         msg="The WeScheme server didn't receive the CSRF token GET parameter from Google. This is Google's fault!!",
+        #         status=500)
         # if csrf_token_cookie != csrf_token_body:
-        #     doublesubmitmismatch
+        #     return error_page(
+        #         msg="CSRF token cookie doesn't match CSRF token parameter. Are you trying to hack us? :'(",
+        #         status=400)
+
+        print(request)
         id_info = id_token.verify_oauth2_token(request.form['credential'], requests.Request(), CLIENT_ID)
+        print(id_info)
 
         # fname is formatted email - formatted in the weird way that the legacy wescheme backend did it
         session['fname'], session['nickname'] = format_email(id_info['email'])
         session['datetime'] = datetime.now(UTC)
 
         def callback(resp):
-            print("ran callback")
             resp.delete_cookie('g_csrf_token')
             resp.set_cookie('token', randtoken())
             return resp
@@ -103,10 +129,10 @@ def login():
         flask.after_this_request(callback)
 
     except Exception as e:
-        print(f"verification failed! exception: {e}")
-    return redirect("/")
+        print("verification failed", e)
+        return error_page(msg="Authentication failed", status=400)
 
-# Shit. Missing sharedAs field in listProjects xml
+    return redirect("/")
 
 @app.route("/openEditor")
 def open_editor():
@@ -125,7 +151,10 @@ def open_editor():
         flags.append('pid')
         ctx['pid'] = request.args['pid']
 
-    return render_template("open-editor.html.jinja", flags=flags, ctx=ctx)
+    return render_template(
+        "open-editor.html.jinja",
+        flags=flags, ctx=ctx,
+        api_key=API_KEY, client_id=CLIENT_ID, app_id=PROJECT_ID)
 
 # True iff request was POST and POST'd token matches cookie'd token
 def is_intentional():
@@ -180,11 +209,12 @@ def save_project():
 @app.route("/console")
 def console():
     if not logged_in():
-        return render_template("error.html.jinja", msg="You need to log in to access this page!", dst="/")
+        return error_page(msg="You need to log in to access this page!", status=401)
 
     flags=['logged_in']
     ctx={'name': session['nickname']}
 
+    print("done")
     return render_template("console.html.jinja", flags=flags, ctx=ctx)
 
 # The way sharing works is it first sends a request here, to make a cloned version of the program.
@@ -199,7 +229,6 @@ def clone_project():
     old = Program.from_id(pid)
 
     if old.owner != session['fname'] and (not old.published):
-        # TODO: handle this error appropriately
         return ""
 
     cloned = Program(
@@ -248,9 +277,7 @@ def get_img(url):
 
 @app.route("/imageProxy")
 def image_proxy():
-    print(request.args)
     url = request.args['url']
-    print(url)
     return Response(get_img(url), mimetype="image/png")
 
 @app.route("/listProjects")
@@ -262,7 +289,7 @@ def list_projects():
     digs = ET.Element("ProgramDigests")
     for proj in projs:
         if not proj.isDeleted:
-            digs.append(proj.to_xml())
+            digs.append(proj.to_xml_for_list())
 
     return Response(ET.tostring(digs), mimetype="text/xml")
 
@@ -289,7 +316,7 @@ def prog_src_to_json(prog, src):
         d = {}
         d['publicId'] = prog.publicId
         d['title'] = prog.title
-        d['modified'] = prog.time
+        d['modified'] = prog.mod_time
         return d
 
     ret['sharedAs'] = list(map(toEntry, sharedAs))
@@ -338,13 +365,12 @@ def share_project():
         print("attempted share, but wrong user")
         return ""
 
-    print(request.form)
     public = request.form['isPublic'] == 'true'
     prog.published = True
     prog.isSourcePublic = public
     prog.time = epoch_time()
     prog.upload()
-    return Response(ET.tostring(prog.to_xml()), mimetype="text/xml")
+    return Response(ET.tostring(prog.to_xml_for_share()), mimetype="text/xml")
 
 @app.route("/view")
 def view():
@@ -368,7 +394,6 @@ def run():
 
     publicId = request.args['publicId']
     prog = Program.from_publicId(publicId)
-    print(prog.notes)
     notes = prog.notes if prog.notes is not None else "\n"
 
     return Response(
@@ -385,5 +410,8 @@ if __name__ == "__main__":
     # the "static" directory. See:
     # http://flask.pocoo.org/docs/1.0/quickstart/#static-files. Once deployed,
     # App Engine itself will serve those files as configured in app.yaml.
-    debug=True
+
+    LOCAL = True
+    SITE_URL = "http://localhost:8080"
+
     app.run(host="127.0.0.1", port=8080, debug=True, use_evalex=False)

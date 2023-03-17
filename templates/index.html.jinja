@@ -3,7 +3,7 @@
 <head>
     <title>WeScheme</title>
 
-    <link rel="icon" href="/static/img/favicon.ico">
+:   <link rel="icon" href="/static/img/favicon.ico">
 
     <meta name="referrer" content="no-referrer-when-downgrade">
 
@@ -77,14 +77,10 @@
             <a class="button" id="loginButton" aria-describedby="loginDescription" href="javascript: void(0)">
 
                 <div id="g_id_onload"
-                    data-client_id="239382796313-gr5fodbdqpb7uotgpffrdelkgna1gqel.apps.googleusercontent.com"
+                    data-client_id="{{ client_id }}"
                     data-context="signin"
                     data-ux_mode="redirect"
-                    {% if debug %}
-                        data-login_uri="http://localhost:8080/login"
-                    {% else %}
-                        data-login_uri="https://wescheme-prototyping.nn.r.appspot.com/login"
-                    {% endif %}
+                    data-login_uri="{{ site_url + "/login" }}"
                     data-nonce=""
                     data-auto_prompt="false">
                 </div>

@@ -72,8 +72,8 @@ h1, h2, #Navigation, #FileControls, #ProgramControls *, #defn, #inter, input{
 #Navigation * {display: inline-block; vertical-align: baseline;}
 
 a.h1{ font-weight: bold; padding-left: 65px;}
-a.h2{ font-size: 20px; font-weight: lighter; padding-left: 4px;}
-a.h2, a.h2:visited {color: lightgray; margin-right: 15px; text-decoration: none;}
+a.h2{ font-size: 20px; padding-left: 4px;}
+a.h2, a.h2:visited {color: white; margin-right: 15px; text-decoration: none;}
 a.h2:hover{text-decoration: underline;}
 
 /* 30px: FILENAME & URL */
