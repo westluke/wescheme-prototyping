@@ -4,7 +4,7 @@ from google.cloud import datastore
 import random
 import time
 
-PROD = True
+PROD = False
 LOCAL = False
 
 BASE_62_CHARS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ";

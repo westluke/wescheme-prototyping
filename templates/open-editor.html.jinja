@@ -3,7 +3,7 @@
 <html>
   <head>
     <meta name="viewport" content="width=device-width, user-scalable=no" />
-    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-eval' 'unsafe-inline' 'unsafe-dynamic' data: filesystem: about: blob: ws: wss:; img-src *;" />
+    <!-- <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-eval' 'unsafe-inline' 'unsafe-dynamic' data: filesystem: about: blob: ws: wss:; img-src *;" /> -->
     <!-- <meta http-equiv="Content-Security-Policy" content="img-src *;" /> -->
     <link rel="icon" href="/static/img/favicon.ico">
 
@@ -19,7 +19,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
     <link rel="apple-touch-icon-precomposed" href="/static/img/BigLogo.png" />
 
-    <script src="/node_modules/google-closure-library/closure/goog/base.js"></script>
+    <!-- <script src="/node_modules/google-closure-library/closure/goog/base.js"></script> -->
 
     <!-- Add compatibility libraries for IE. -->
     {% include "compat.html" %}
@@ -97,6 +97,7 @@
         // Use the API Loader script to load google.picker
         function onApiLoad() {
             gapi.load('picker', onPickerApiLoad);
+            //gapi.load('gapi.iframes', function() {console.log('iframes loaded');});
         }
 
         function onPickerApiLoad() {
@@ -115,8 +116,9 @@
                 tokenClient = google.accounts.oauth2.initTokenClient({
                     client_id: plt.config.CLIENT_ID,
 
-                    // Scope to use to access user's Drive items.
+                    // Scope to use to access user's Drive items. This is the only useful non-sensitive scope we can use.
                     scope: 'https://www.googleapis.com/auth/drive.file',
+
                     callback: '', // defined later
                 });
                 gisInited = true;
