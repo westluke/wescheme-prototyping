@@ -90,7 +90,8 @@
 
     <script>
         let tokenClient;
-        var accessToken;
+        var accessToken = window.sessionStorage.getItem('accessToken');
+        console.log(accessToken);
         let pickerInited = false;
         let gisInited = false;
 
@@ -112,12 +113,13 @@
             }
         } else {*/
             gisLoaded = function() {
-                // TODO(developer): Replace with your client ID and required scopes
                 tokenClient = google.accounts.oauth2.initTokenClient({
                     client_id: plt.config.CLIENT_ID,
 
                     // Scope to use to access user's Drive items. This is the only useful non-sensitive scope we can use.
-                    scope: 'https://www.googleapis.com/auth/drive.file',
+                    // Note to future victims: this MUST BE REPEATED TWICE. The Google API's break otherwise, because
+                    // Google is evil and nonsensical. But that's how it is.
+                    scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.file',
 
                     callback: '', // defined later
                 });

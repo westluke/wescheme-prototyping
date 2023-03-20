@@ -82,7 +82,7 @@ def get_goog_file(goog_filepath):
 def get_js(rest):
     return redirect("/static/mzscheme-vm/" + rest)
     
-@app.route("/logout", methods=["GET"])
+@app.route("/logout", methods=["GET", "POST"])
 def logout():
     session.clear()
     def callback(resp):

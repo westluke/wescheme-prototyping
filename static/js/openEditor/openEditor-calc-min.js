@@ -760,7 +760,6 @@ WeSchemeEditor.prototype.showPicker=function(a){
             .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
             .addView(view)
             .addView(new google.picker.DocsUploadView())
-            // .setOrigin("https://wescheme-prototyping.nn.r.appspot.com")
             .setAppId(plt.config.APP_ID)
             .setOAuthToken(accessToken)
             .setDeveloperKey(plt.config.API_KEY)
@@ -776,6 +775,7 @@ WeSchemeEditor.prototype.showPicker=function(a){
             throw (response);
         }
         accessToken = response.access_token;
+        window.sessionStorage.setItem("accessToken", accessToken)
         showPicker();
     };
 
