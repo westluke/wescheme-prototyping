@@ -78,7 +78,7 @@ class Program:
         return list(map(lambda x: Program.from_entity(x), list(back_q.fetch())))
 
     def to_entity(self):
-        ent = datastore.Entity(self.key)
+        ent = datastore.Entity(self.key, exclude_from_indexes=('notes',))
         if self.title is not None: ent['title_'] = self.title
         if self.author is not None: ent['author_'] = self.author
         if self.owner is not None: ent['owner_'] = self.owner

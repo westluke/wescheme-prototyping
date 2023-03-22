@@ -23,7 +23,7 @@ class SourceCode:
             src=ent.get('src_'))
 
     def to_entity(self):
-        ent = datastore.Entity(self.key)
+        ent = datastore.Entity(self.key, exclude_from_indexes=('src_',))
         if self.name is not None: ent['name'] = self.name
         if self.src is not None: ent['src_'] = self.src
         return ent
