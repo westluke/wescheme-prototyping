@@ -13,7 +13,10 @@ class SourceCode:
         Pull SourceCode whose parent is the given key
         '''
         query = client.query(kind='SourceCode', ancestor=key)
+        # query = client.query(kind='SourceCode')
+        # query.add_filter("notes", "=", key)
         src = list(query.fetch())[0]
+        print(src)
         return SourceCode.from_entity(src)
 
     def from_entity(ent):

@@ -707,13 +707,29 @@ this),c.actions.loadProject(a.pid,void 0,d,k);else if(a.publicId)plt.wescheme.We
 
 // Create and render a Google Picker object for selecting from Drive
 WeSchemeEditor.prototype.showPicker=function(a){
+
+    // Kinda janky system, but it works. The point is that users get the alert every 5 times they open the image browser, in case they forget.
+    // Every time, the 'alerted' session variable gets longer. When it reaches 5 characters, it gets reset to empty and the alert fires.
+    var alerted = window.sessionStorage.getItem('alerted');
+    if (alerted == null) { alerted = "0123456789" }
+
+    if (alerted.length >= 10) {
+        window.sessionStorage.setItem('alerted', "");
+        alert(
+            "Please note that the image browser may not function properly if any of the following are true:"
+            +"\n - 3rd party cookies are disabled in your browser"
+            +"\n - you have an ad-blocker activated"
+            +"\n - you're in a private window"
+        );
+    } else {
+        window.sessionStorage.setItem('alerted', alerted + alerted.length);
+    }
+
     
     // where is the focus?
     var editor = a ? this.defn : this.interactions.prompt.textContainer;
 
-    
-    // Setting the image permissions for anyone having
-    // the link.
+    // Setting the image permissions for anyone having the link.
     function setPermissionsAndInsertCode(fileId, body) {
         var request = gapi.client.drive.permissions.insert({
             'fileId': fileId,
@@ -731,8 +747,6 @@ WeSchemeEditor.prototype.showPicker=function(a){
         var pathToImg = "\"https://drive.google.com/uc?export=download&id=" + fileId + "\"";
         editor.setCode(preCursorCode + "(image-url "+ pathToImg +")"+postCursorCode);
     }
-
-
 
     function pickerCallback(data) {
         if (data.action == google.picker.Action.PICKED) {
@@ -752,20 +766,20 @@ WeSchemeEditor.prototype.showPicker=function(a){
     }
 
     const showPicker = () => {
-        // TODO(developer): Replace with your API key
         var view = new google.picker.View(google.picker.ViewId.DOCS);
         view.setMimeTypes("image/png,image/jpeg,image/jpg,image/webp");
         const picker = new google.picker.PickerBuilder()
             .enableFeature(google.picker.Feature.NAV_HIDDEN)
             .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
+            // .enableFeature(google.picker.Feature.MINE_ONLY)
             .addView(view)
             .addView(new google.picker.DocsUploadView())
             .setAppId(plt.config.APP_ID)
+            // .setOrigin(window.location.protocol + '//' + window.location.host)
             .setOAuthToken(accessToken)
             .setDeveloperKey(plt.config.API_KEY)
             .setCallback(pickerCallback)
             .build();
-        console.log(picker);
         picker.setVisible(true);
     }
 
@@ -780,12 +794,12 @@ WeSchemeEditor.prototype.showPicker=function(a){
     };
 
     if (accessToken === null) {
-        // Prompt the user to select a Google Account and ask for consent to share their data
-        // when establishing a new session.
+    //     // Prompt the user to select a Google Account and ask for consent to share their data
+    //     // when establishing a new session.
         tokenClient.requestAccessToken({prompt: 'consent'});
     } else {
         // Skip display of account chooser and consent dialog for an existing session.
-        tokenClient.requestAccessToken({prompt: ''});
+        tokenClient.requestAccessToken({ prompt: '' });
     }
 }
 

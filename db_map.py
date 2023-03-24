@@ -2,10 +2,16 @@ from util import *
 
 
 # prog_key = client.key("Program", 4838056624914432)
-# prog_key = client.key("Program", 5633064340291584)
-prog_key = client.key("Program", 4923921426546688)
+prog_key = client.key("Program", 5633064340291584)
 # debug_q = client.query(kind='SourceCode', ancestor=prog_key)
-debug_q = client.query(kind='SourceCode', ancestor=prog_key)
+debug_q = client.query(kind='SourceCode')
+
+# Get every SourceCode
+# Extract ancestor
+# Explicitly set it as property
+# Replace it in db
+
+# But first, test if this will break existing wescheme.org by manually creating a SourceCode/Program
 
 ents = list(debug_q.fetch(limit=1))[0]
 print(ents)

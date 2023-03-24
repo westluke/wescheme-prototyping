@@ -24,9 +24,6 @@
     <!-- Add compatibility libraries for IE. -->
     {% include "compat.html" %}
 
-    <!-- Google analytics support -->
-    {% include "google-analytics.html.jinja" %}
-
     <!-- dynamic script loading -->
     <script src="/static/js/loadScript.js" type="text/javascript"></script>
 
@@ -91,7 +88,6 @@
     <script>
         let tokenClient;
         var accessToken = window.sessionStorage.getItem('accessToken');
-        console.log(accessToken);
         let pickerInited = false;
         let gisInited = false;
 
@@ -115,6 +111,7 @@
             gisLoaded = function() {
                 tokenClient = google.accounts.oauth2.initTokenClient({
                     client_id: plt.config.CLIENT_ID,
+
 
                     // Scope to use to access user's Drive items. This is the only useful non-sensitive scope we can use.
                     // Note to future victims: this MUST BE REPEATED TWICE. The Google API's break otherwise, because
@@ -211,6 +208,10 @@
       });
 
     </script>
+
+
+    <!-- Google analytics support -->
+    {% include "google-analytics.html.jinja" %}
   </head>
 
   <body onload="setup()">

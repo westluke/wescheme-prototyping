@@ -54,6 +54,9 @@
     <script src="/static/mzscheme-vm/evaluator-min.js" type="text/javascript"></script>
     <script src="/static/js/loadScript-min.js" type="text/javascript"></script>
     <script src="/static/js/run-calc-min.js" type="text/javascript"></script>
+
+    <!-- Google analytics support -->
+    {% include "google-analytics.html.jinja" %}
 </head>
 
 <body onload="plt.wescheme.runner.init('null', '{{ (publicId | e) if (publicId is not none) else 'null' }}')">
