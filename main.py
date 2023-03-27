@@ -112,12 +112,11 @@ def login():
         #         msg="CSRF token cookie doesn't match CSRF token parameter. Are you trying to hack us? :'(",
         #         status=400)
 
-        print(request)
         id_info = id_token.verify_oauth2_token(request.form['credential'], requests.Request(), CLIENT_ID)
-        print(id_info)
 
         # fname is formatted email - formatted in the weird way that the legacy wescheme backend did it
         session['fname'], session['nickname'] = format_email(id_info['email'])
+        print(session)
         session['datetime'] = datetime.now(UTC)
 
         def callback(resp):
@@ -214,7 +213,6 @@ def console():
     flags=['logged_in']
     ctx={'name': session['nickname']}
 
-    print("done")
     return render_template("console.html.jinja", flags=flags, ctx=ctx)
 
 # The way sharing works is it first sends a request here, to make a cloned version of the program.

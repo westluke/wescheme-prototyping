@@ -45,9 +45,10 @@ def load_secret_key():
 
 # Returns (formatted_email, nickname)
 def format_email(email):
+    fmt = email
     if GMAIL_EXT not in email:
-        email = email + GMAIL_EXT
-    return (email, email)
+        fmt = fmt + GMAIL_EXT
+    return (fmt, email)
 
 def randtoken():
     return "".join(random.choices(BASE_62_CHARS, k=TOKEN_LENGTH))

@@ -86,6 +86,12 @@
     <script src="/static/js/openEditor/openEditor-calc-min.js" type="text/javascript"></script>
 
     <script>
+      function logout() {
+            window.location='/logout';
+      }
+    </script>
+
+    <script>
         let tokenClient;
         var accessToken = window.sessionStorage.getItem('accessToken');
         let pickerInited = false;
@@ -293,7 +299,7 @@
                   <li><a  class="h2" role="button"  id="account" 
                       href="/console" target="console"
                       aria-label="Go to program list">Programs</a></li>
-                  <li><a  class="h2" role="button"  id="logout" href="javascript: void(0)"
+                  <li><a  class="h2" role="button"  id="logout" onclick="logout()"
                       aria-label="Log out of WeScheme and other Google services">Logout</a></li>
             {% endif %}
 
