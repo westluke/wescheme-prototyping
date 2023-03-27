@@ -50,19 +50,22 @@
     <main>
 
     {% if prog is not none %}
-        <a id="runIt" class="button" aria-label="Run, F7" aria-describedby="runDescription"
-        href="/run?publicId={{ publicId | e }}">Run
-        <span class="tooltip" id="runDescription">Run the code &amp; show the output</span>
-        </a>
+        <div id="leftButton">
+            <a id="runIt" class="button" aria-label="Run, F7" aria-describedby="runDescription"
+        href="/run?publicId={{ publicId | e }}">Run</a>
+            <span class="tooltip" id="runDescription">Run the code &amp; show the output</span>
+        </div>
+        
     {% endif %}
 
     <img id="Logo" src="/static/img/BigLogo.png" alt="">
 
     {% if (prog is not none) and isPublic %}
-        <a id="viewSource" class="button" aria-label="Edit, F8" aria-describedby="editDescription"
-        href="/openEditor?publicId={{ publicId | e }}">Edit
-        <span class="tooltip" id="runDescription">Open the code in a new editor</span>
-        </a>
+        <div id="leftButton">
+            <a id="viewSource" class="button" aria-label="Edit, F8" aria-describedby="editDescription"
+        href="/openEditor?publicId={{ publicId | e }}">Edit</a>
+           <span class="tooltip" id="runDescription">Open the code in a new editor</span>
+        </div>
 
         <div id="notes">
             {{ notes | e }}

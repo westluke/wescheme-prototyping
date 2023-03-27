@@ -3,7 +3,7 @@
 <head>
     <title>WeScheme</title>
 
-:   <link rel="icon" href="/static/img/favicon.ico">
+    <link rel="icon" href="/static/img/favicon.ico">
 
     <meta name="referrer" content="no-referrer-when-downgrade">
 
@@ -22,7 +22,9 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
     <style>
-        #loginButton { margin:  -1px; }
+        #loggedOutWrapper > *, #loggedInWrapper > * { vertical-align: middle; }
+        #startCoding { width: 200px; }
+        #loggedOutWrapper #rightButton .tooltip { top: 50px; }
     </style>
 
     <script>
@@ -58,26 +60,29 @@
 
     {% if logged_in %}
         <div id="loggedInWrapper">
-            <a class="button" id="myPrograms" aria-describedby="myProgramsDescription" href="javascript: void(0)">My Programs
+            <div id="leftButton">
+                <a class="button" id="myPrograms" aria-describedby="myProgramsDescription" href="javascript: void(0)">My Programs</a>
                 <span class="tooltip" id="myProgramsDescription">...see and manage my programs</span>
-            </a>
+            </div>
 
             <img src="/static/img/BigLogo.png" alt="">
 
-            <a class="button" id="logoutButton" href="javascript: void(0)">Log Out
-                 <span class="tooltip" id="loginDescription">...of all Google services</span>
-            </a>
+            <div id="rightButton">
+                <a class="button" id="logoutButton" href="javascript: void(0)">Log Out</a>
+                <span class="tooltip" id="loginDescription">...of all Google services</span>
+            </div>
         </div>
 
     {% else %}
         <div id="loggedOutWrapper">
-            <a class="button" id="startCoding" aria-describedby="startCodingDescription" href="openEditor">Start Coding
+            <div id="leftButton">
+                <a class="button" id="startCoding" aria-describedby="startCodingDescription" href="javascript: void(0)">Start Coding</a>
                 <span class="tooltip" id="startCodingDescription">...without being able to save</span>
-            </a>
+            </div>
 
             <img src="/static/img/BigLogo.png" alt="">
 
-            <a class="button" id="loginButton" aria-describedby="loginDescription" href="javascript: void(0)">
+            <div id="rightButton" aria-describedby="loginDescription" href="javascript: void(0)">
 
                 <div id="g_id_onload"
                     data-client_id="{{ client_id }}"
