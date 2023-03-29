@@ -345,11 +345,14 @@ def load_project():
 
     elif 'publicId' in request.args:
         prog = Program.from_publicId(request.args['publicId'])
-        if not prog.isSourcePublic:
+
+        if not prog.published:
             if not logged_in():
                 return ""
             elif prog.owner != session['fname']:
+                print(session)
                 return ""
+
         src = SourceCode.from_parent(prog.key)
         resp = prog_src_to_json(prog, src)
         return Response(resp, mimetype="text/json")
