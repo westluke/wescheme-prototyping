@@ -18,7 +18,7 @@ if PROD:
     CLIENT_ID = "981340394888-d28ji2vus7h06du2hgum27sf1mjs7ssm.apps.googleusercontent.com"
     PROJECT_ID = "wescheme-hrd-2"
     API_KEY = "AIzaSyCP00M0rthRxOPCcaVHS54iO5WfNmNA2PU"
-    SITE_URL = "https://wescheme.org"
+    SITE_URL = "https://www.wescheme.org"
 else:
     CLIENT_ID = "239382796313-gr5fodbdqpb7uotgpffrdelkgna1gqel.apps.googleusercontent.com"
     PROJECT_ID = "wescheme-prototyping"
