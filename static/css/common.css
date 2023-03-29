@@ -38,27 +38,42 @@ body{
     background: #546DAF;
     text-decoration: none;
 }
-
-.button, .buttonText{
+#leftButton, #rightButton { display: inline-block; position: relative;}
+.button, .buttonText {
+    user-select: none;
+    text-decoration: none;
+    background: white;
+    border: 1px solid #dadce0;
+    color: #3c4043;
+    cursor: pointer;
+    display: inline-block;
+    font-family: "Google Sans",arial,sans-serif;
+    font-size: 14px;
+    letter-spacing: 0.25px;
+    outline: none;
+    overflow: hidden;
+    padding: 0 12px;
+    position: relative;
     text-align: center;
     vertical-align: middle;
-    border:     solid 1px black;
-    background: lightsteelblue;
-    font-size:  1em;
-    font-family:Lato, Century Gothic, Arial, Helvetica, sans-serif;
-    width:      120px;
-    height:     22px;
-    cursor:     pointer;
-    display:    inline-block;
-    position:   relative;
-    text-decoration: none;
-    color:      black;
+    white-space: nowrap;
+    width: 140px;
+    height: 30px;
+    border-radius: 4px;
+    line-height: 2;
 }
-a.button>span.tooltip{ position: absolute; top: 40px; left: 0px; font-size: 14px; opacity: 0; };
+#leftButton>span.tooltip, #rightButton>span.tooltip { 
+    position: absolute; 
+    top: 40px; 
+    left: 0px; 
+    font-size: 14px; 
+    opacity: 0; 
+    width: 100%;
+};
 a.button:hover{
     background: gray;
 }
-a.button:hover>span.tooltip{ opacity: 0.5; };
+#leftButton:hover>span.tooltip, #rightButton:hover>span.tooltip{ opacity: 0.5; };
 
 ul.socialBookmarks{  padding: 0px; }
 ul.socialBookmarks{
