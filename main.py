@@ -49,6 +49,12 @@ def favicon():
     with app.open_resource(f"static/img/favicon.ico", 'rb') as f:
         return Response(f.read(), mimetype="image/vnd.microsoft.icon")
 
+@app.route("/images/<path:imgpath>")
+def images_intercept(imgpath):
+    with app.open_resource(f"static/img/{imgpath}", 'rb') as f:
+        return Response(f.read(), mimetype=get_mime(imgpath))
+
+
 @app.route("/doc/<path:comp>")
 def docs(comp):
     with app.open_resource(f"doc/{comp}", 'r') as f:
