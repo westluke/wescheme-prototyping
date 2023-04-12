@@ -171,13 +171,19 @@ def save_existing_program():
     form = request.form
     pid = int(form['pid'])
     extant = Program.from_id(pid)
+    src = SourceCode.from_parent(extant.key)
+
+    # print(extant)
+    # print(extant.owner)
+    # print(extant.published)
 
     if extant.owner == session['fname'] and (not extant.published):
         if 'title' in form: extant.title = form['title']
-        if 'code' in form: extant.code = form['code']
+        if 'code' in form: src.src = form['code']
         if 'notes' in form: extant.notes = form['notes']
         if extant.publicId is None: extant.publicId = Program.gen_publicId()
         extant.upload()
+        src.upload()
 
     #TODO: throw error if not allowed
     return Response(str(pid), mimetype="text/plain")
