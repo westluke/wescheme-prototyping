@@ -1,0 +1,165 @@
+#!/usr/bin/env racket
+#lang racket/base
+(require racket/file
+         racket/runtime-path
+         racket/path
+         racket/port
+         net/url
+         (for-syntax racket/base))
+
+
+;; Assumes closure-library is under externals/closure.
+
+(define-runtime-path closure-dir (build-path "war-src" "closure"))
+(define-runtime-path closure-zip-path (build-path "externals" "closure-library-20111110-r1376.zip"))
+
+(define-runtime-path codemirror-src-dir (build-path "war-src" "js" "codemirror"))
+(define-runtime-path codemirror-dest-dir (build-path "war" "js" "codemirror"))
+
+(define appengine-version "1.9.60")
+(define appengine-url
+  (format "https://storage.googleapis.com/appengine-sdks/featured/appengine-java-sdk-~a.zip" appengine-version))
+(define appengine-zip-path
+  (build-path "externals" (format "appengine-java-sdk-~a.zip" appengine-version)))
+(define appengine-dir
+  (build-path "lib" (format "appengine-java-sdk-~a" appengine-version)))
+
+;; out-of-date?: path path -> boolean
+;; Returns true if the target file looks at least as new as the source file.
+(define (out-of-date? source-file target-file)
+  (cond
+   [(not (file-exists? target-file))
+    #t]
+   [else
+    (>= (file-or-directory-modify-seconds source-file)
+        (file-or-directory-modify-seconds target-file))]))
+
+(define (call-system #:pipe-input-from (pipe-input-from #f)
+                     #:pipe-output-to (pipe-output-to #f)
+                     cmd . args)
+  (define stdin (if pipe-input-from
+                    (open-input-file pipe-input-from)
+                    (current-input-port)))
+  (define stdout (if pipe-output-to
+                     (begin
+                       (unless (let-values ([(base path dir?) (split-path pipe-output-to)])
+                                 (eq? base 'relative))
+                         (make-directory* (path-only pipe-output-to)))
+                       (open-output-file pipe-output-to #:exists 'replace))
+                     (current-output-port)))
+
+  (define resolved-cmd-standard
+    (if (file-exists? cmd) cmd
+      (find-executable-path cmd)))
+
+  (define resolved-cmd-windows
+    (and (equal? (system-type) 'windows)
+         (and (string? cmd)
+              (find-executable-path (string-append cmd ".exe")))))
+
+  (define resolved-cmd
+    (or resolved-cmd-standard resolved-cmd-windows))
+
+  (unless resolved-cmd
+    (error 'build (format "I could not find ~s in your PATH" cmd)))
+
+  (define-values (a-subprocess subprocess-in subprocess-out subprocess-err)
+    (apply subprocess stdout stdin (current-error-port) resolved-cmd args))
+
+  (subprocess-wait a-subprocess)
+
+
+  (unless (equal? (subprocess-status a-subprocess) 0)
+      (error 'build (format "I could not launch ~s" cmd)))
+
+
+  (when pipe-input-from
+    (close-input-port stdin))
+  (when pipe-output-to
+    (close-output-port stdout)))
+
+
+(define (generate-js-runtime!)
+  (call-system "bash" "./generate-js-runtime.sh"))
+
+;; cd into CM, build a fresh copy, then move it to war/js/codemirror/lib
+(define (update-codemirror-lib!)
+  (current-directory "war-src/js/codemirror/")
+  (call-system "npm" "install")
+  (current-directory "../../../")
+  (unless (directory-exists? codemirror-dest-dir)
+    (make-directory* codemirror-dest-dir))
+  (call-system "cp" "-r" "./war-src/js/codemirror/lib" "./war/js/codemirror/")
+  (call-system "mkdir" "-p" "./war/js/codemirror/addon")
+  (call-system "cp" "-r" "./war-src/js/codemirror/addon/edit/" "./war/js/codemirror/addon/edit")
+  (call-system "cp" "-r" "./war-src/js/codemirror/addon/runmode/" "./war/js/codemirror/addon/runmode"))
+
+(define (ensure-codemirror-installed!)
+  (unless (directory-exists? codemirror-src-dir)
+    (fprintf (current-error-port) "Codemirror hasn't been pulled.\n  Trying to run: git submodule init/update now...\n")
+    (call-system "git" "submodule" "init")
+    (call-system "git" "submodule" "update")
+
+    (unless (directory-exists? codemirror-src-dir)
+      (fprintf (current-error-port) "Codemirror could not be pulled successfully.  Exiting.\n")
+      (exit 0))))
+
+
+(define (ensure-closure-library-installed!)
+  (unless (directory-exists? closure-dir)
+    (fprintf (current-error-port) "The Closure library has not been installed yet.\n")
+    (fprintf (current-error-port) "Trying to unpack it into 'war-src/closure'.\n")
+    (let ([zip-path (normalize-path closure-zip-path)])
+      (parameterize ([current-directory (build-path closure-dir 'up)])
+        (call-system "unzip" (path->string zip-path))))
+    (unless (directory-exists? closure-dir)
+      (fprintf (current-error-port) "The Closure library could not be installed; please check.\n")
+      (exit 0))))
+
+(define (ensure-appengine-installed!)
+  (unless (directory-exists? appengine-dir)
+    (fprintf (current-error-port)
+             "The Google AppEngine API hasn't been installed yet.\n")
+    (cond [(file-exists? appengine-zip-path)
+           (void)]
+          [else
+           (fprintf (current-error-port)
+                    "Trying to download it now... saving to ~s\n" appengine-zip-path)
+           (fprintf (current-error-port)
+                    "(This will take a while; the API download is about 90 MB.)\n")
+           (call-with-output-file appengine-zip-path
+             (lambda (op)
+               (define ip (get-pure-port (string->url appengine-url)))
+               (copy-port ip op)
+               (close-input-port ip)
+               (close-output-port op)))])
+    (fprintf (current-error-port)
+             "The API will be installed in: ~s" appengine-dir)
+    (sleep 5)
+    (unless (directory-exists? (build-path appengine-dir 'up))
+      (make-directory* (build-path appengine-dir 'up)))
+    (let ([zip-path (normalize-path appengine-zip-path)])
+      (parameterize ([current-directory (build-path appengine-dir 'up)])
+        (call-system "unzip" (path->string zip-path))))
+    (unless (directory-exists? appengine-dir)
+      (fprintf (current-error-port) "The Google AppEngine library could not be installed; please check.\n")
+      (exit 0))
+    (fprintf (current-error-port)
+             "Google AppEngine API installed.\n")))
+
+
+(define (update-compiled-libs! new-path old-path)
+  (call-system "bash" "./update-compiled-files.sh" new-path old-path))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(printf "Building properties file for JS\n")
+(copy-file "wescheme.properties" "war/wescheme.properties"
+           #t)
+(call-system "python" "bin/make-properties.py"
+             #:pipe-input-from "wescheme.properties"
+             #:pipe-output-to "war-src/js/wescheme-properties.js")
+
+
+

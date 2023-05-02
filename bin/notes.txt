@@ -1,0 +1,61 @@
+Building process, as I understand it, which starts with running `rebuild-and-upload.sh`
+
+Run generate-js-runtime, which just concatenates a bunch of files, with order determined from order file in war-src/js/js-runtime/ 
+
+Then supposedly there's a compression bug which requires removing war/js/mzscheme-vm/*-min.js, and regenerating them?
+Or is it only regenerating war/js/mzscheme-vm/support?
+Anyways, it calls compress-js.rkt on mzscheme-vm/support.js, and compress-js uses a racket package for the closure compiler, which I'm not gonna use.
+
+    rm war/js/mzscheme-vm/*-min.js
+    ./bin/compress-js.rkt war/js/mzscheme-vm/support.js
+
+What exactly is the difference between generate-js-runtime and compress-js? That's a little confusing.
+I need to figure out exactly which js files compress-js is looking for. Should maybe have a static list?
+
+    ./build-console-and-editor.rkt
+        which calls update-compiled-files.sh
+
+Are there any other executable files? being called by any of the previous?
+
+
+
+
+Should be able to just skip compress-js.rkt, figure out necessary file renaming
+Also, check out compiler branch, to see how they use npm version of closure compiler instead of 
+
+build-console-and-editor.rkt
+
+
+
+
+
+
+
+need to build dependencies with closure-make-deps, another npm package.
+docs here: https://google.github.io/closure-library/develop/get-started
+so that's three total, google-closure-deps, google-closure-library, google-closure-compiler.
+Entry point is always that html file must include the base.js of the library.
+
+
+npx closure-make-deps \
+    --validate \
+    --file node_modules/google-closure-library/closure/goog/deps.js \
+    --closure-path node_modules/google-closure-library/closure/goog \
+    --root js-src \
+    > deps.js
+
+npx google-closure-compiler \
+   --js js-src/**/*.js \
+   --js node_modules/google-closure-library/**/*.js \
+   --dependency_mode=PRUNE \
+   --entry_point=js-src/splash.js \
+   --js_output_file splash-comp.js
+
+
+
+    Ugh ok so the npm versions seem to be straight up broken. So try github versions???? not even sure how that will work tho.
+
+
+OK so the lesson from talking with Emmanuel is that I shouldn't be fucking around with closure-make-deps at all, Just google-closure-compiler.
+I think make-deps would be if I was runnin the non-compiled versionms, but I'm not doign that.
+

@@ -1,0 +1,6 @@
+codemirror
+closure compiler
+npm
+gcloud
+auth login
+adjust util.py
