@@ -3,4 +3,12 @@ closure compiler
 npm
 gcloud
 auth login
+
+
+./bin/mybuild.sh
+. ./env/bin/activate
+python main.py
+
 adjust util.py
+
+gcloud app deploy

@@ -1,2 +1,17 @@
 Guide for building
 Guide for running locally
+
+The following should be installed and callable from the command line:
+    `python3.11`
+    `gcloud`
+    `npm`
+
+
+Also need ot make soreu that the right gcloud modules are installed.
+And make sure that the credentials for the database are right!
+
+
+Then should be able to just run `install.sh`. If not, fiddle with it lol.
+
+Just delete everything from my computer and do it again
+npm install codemirror5 as well, don't want to have to do gitmodules
