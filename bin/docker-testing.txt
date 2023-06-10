@@ -1,0 +1,6 @@
+cd home
+mkdir testusr
+cd testusr
+apt update
+apt install git
+git clone https://github.com/westluke/wescheme-prototyping

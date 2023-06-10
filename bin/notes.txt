@@ -59,3 +59,15 @@ npx google-closure-compiler \
 OK so the lesson from talking with Emmanuel is that I shouldn't be fucking around with closure-make-deps at all, Just google-closure-compiler.
 I think make-deps would be if I was runnin the non-compiled versionms, but I'm not doign that.
 
+
+
+
+
+
+Have to replace codemirror5 references to look inside node_modules. Where are they?
+./templates/open-editor.html.jinja:    <!-- codemirror5 -->
+./main.py:@app.route("/codemirror5/<path:cm_filepath>")
+./app.yaml:  static_dir: codemirror5
+That's all. ok.
+
+Noice, a simple npm replacement seems to work.

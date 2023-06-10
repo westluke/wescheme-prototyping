@@ -74,9 +74,9 @@ def root():
         client_id=CLIENT_ID,
         site_url=SITE_URL)
 
-@app.route("/codemirror5/<path:cm_filepath>")
+@app.route("/node_modules/codemirror/<path:cm_filepath>")
 def get_cm_file(cm_filepath):
-    with app.open_resource(f"codemirror5/{cm_filepath}", 'r') as f:
+    with app.open_resource(f"node_modules/codemirror/{cm_filepath}", 'r') as f:
         return Response(f.read(), mimetype=get_mime(cm_filepath))
 
 @app.route("/node_modules/google-closure-library/<path:goog_filepath>")
