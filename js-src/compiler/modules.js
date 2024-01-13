@@ -206,6 +206,7 @@ plt.compiler = plt.compiler || {};
                                             ,"empty-image"
                                             ,"scene+line"
                                             ,"put-image"
+                                            ,"translate"
                                             ,"place-image"
                                             ,"place-image/align"
                                             //,"put-pinhole"

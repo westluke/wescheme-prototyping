@@ -4500,6 +4500,8 @@ PRIMITIVES['put-image'] =
       }
     });
 
+PRIMITIVES['translate'] = PRIMITIVES['put-image'];
+
 
 PRIMITIVES['place-image'] =
     new PrimProc('place-image',
