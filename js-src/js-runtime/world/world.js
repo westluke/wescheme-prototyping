@@ -1711,7 +1711,9 @@ if (typeof(world) === 'undefined') {
     colorDb.put("YELLOWGREEN", types.color(154, 205, 50, 255));
 
     var nameToColor = function(s) {
-         return colorDb.get('' + s);
+        s.replace('-',''); // remove dashes
+        s = s.toUpperCase()
+        return colorDb.get('' + s);
     };
  
     // based on answer provided at
