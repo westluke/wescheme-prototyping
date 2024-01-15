@@ -245,6 +245,8 @@ plt.compiler = plt.compiler || {};
                                             ,"above"
                                             ,"above/align"
                                             ,"rotate"
+                                            ,"dilate"
+                                            ,"dilate/xy"
                                             ,"scale"
                                             ,"scale/xy"
                                             ,"crop"

@@ -5404,6 +5404,7 @@ new PrimProc('scale/xy',
 							img);
 
 			 });
+PRIMITIVES['dilate/xy'] = PRIMITIVES['scale/xy'];
 
 PRIMITIVES['scale'] =
 new PrimProc('scale',
@@ -5416,6 +5417,7 @@ new PrimProc('scale',
 											jsnums.toFixnum(factor),
 											img);
 			 });
+PRIMITIVES['dilate'] = PRIMITIVES['scale'];
 
 PRIMITIVES['crop'] =
 new PrimProc('crop',
