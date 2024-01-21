@@ -247,6 +247,7 @@ plt.compiler = plt.compiler || {};
                                             ,"rotate"
                                             ,"scale"
                                             ,"scale/xy"
+                                            ,"dilate"
                                             ,"crop"
                                             ,"frame"
                                             ,"flip-horizontal"

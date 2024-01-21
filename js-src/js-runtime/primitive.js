@@ -5417,6 +5417,9 @@ new PrimProc('scale',
 											img);
 			 });
 
+PRIMITIVES['dilate'] = PRIMITIVES['scale'];
+
+
 PRIMITIVES['crop'] =
 new PrimProc('crop',
 			 5,
