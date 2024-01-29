@@ -296,6 +296,8 @@ this.sideC===this.sideB?b+(" equilateral triangle with sides of length "+this.si
 this.height)};D.prototype.render=function(b,c,e){b.save();b.beginPath();var h="outline"!==this.style.toString().toLowerCase()?0:.5,m=this.width-2*h,q=this.height-2*h;c+=h;e+=h;h=m/2*.5522848;var w=q/2*.5522848,v=c+m,u=e+q;m=c+m/2;q=e+q/2;b.moveTo(c,q);b.bezierCurveTo(c,q-w,m-h,e,m,e);b.bezierCurveTo(m+h,e,v,q-w,v,q);b.bezierCurveTo(v,q+w,m+h,u,m,u);b.bezierCurveTo(m-h,u,c,q+w,c,q);b.closePath();"outline"===this.style.toString().toLowerCase()?(b.strokeStyle=ba(this.color),b.stroke()):(b.fillStyle=
 ba(this.color,this.style),b.fill());b.restore()};D.prototype.isEqual=function(b,c){return b instanceof D&&this.width===b.width&&this.height===b.height&&this.style===b.style&&types.isEqual(this.color,b.color,c)||B.prototype.isEqual.call(this,b,c)};var fa=function(b,c,e){var h=0<=b?0<=c?[{x:0,y:0},{x:b,y:c}]:[{x:0,y:-c},{x:b,y:0}]:0<=c?[{x:-b,y:0},{x:0,y:c}]:[{x:-b,y:-c},{x:0,y:0}];this.x=b;this.y=c;this.width=Math.abs(b);this.height=Math.abs(c);this.style="outline";this.color=e;this.vertices=h};fa.prototype=
 v(B.prototype);fa.prototype.getAriaText=function(b){return u(y(this.color,""))+" line of width "+this.x+" and height "+this.y};world.Kernel.applyEffect=function(b){if(b!==types.EMPTY){if(types.isPair(b))return world.Kernel.applyEffect(b.first).concat(world.Kernel.applyEffect(b.rest));if(b=b.run())return b}return[]};v=function(){this.colors={}};v.prototype.put=function(b,c){this.colors[b]=c};v.prototype.get=function(b){if(b.toString)return this.colors[b.toString().replace(/\s/g,"").toUpperCase()]};
+
+
 var A=new v;A.put("ORANGE",types.color(255,165,0,255));A.put("LIGHTORANGE",types.color(255,216,51,255));A.put("MEDIUMORANGE",types.color(255,165,0,255));A.put("ORANGERED",types.color(255,69,0,255));A.put("TOMATO",types.color(255,99,71,255));A.put("RED",types.color(255,0,0,255));A.put("LIGHTRED",types.color(255,102,102,255));A.put("MEDIUMRED",types.color(255,0,0,255));A.put("DARKRED",types.color(139,0,0,255));A.put("FIREBRICK",types.color(178,34,34,255));A.put("CRIMSON",types.color(220,20,60,255));
 A.put("DEEPPINK",types.color(255,20,147,255));A.put("MAROON",types.color(176,48,96,255));A.put("INDIANRED",types.color(205,92,92,255));A.put("MEDIUMVIOLETRED",types.color(199,21,133,255));A.put("VIOLETRED",types.color(208,32,144,255));A.put("LIGHTCORAL",types.color(240,128,128,255));A.put("HOTPINK",types.color(255,105,180,255));A.put("PALEVIOLETRED",types.color(219,112,147,255));A.put("LIGHTPINK",types.color(255,182,193,255));A.put("ROSYBROWN",types.color(188,143,143,255));A.put("PINK",types.color(255,
 192,203,255));A.put("MEDIUMPINK",types.color(255,192,203,255));A.put("DARKPINK",types.color(204,141,152,255));A.put("ORCHID",types.color(218,112,214,255));A.put("LAVENDERBLUSH",types.color(255,240,245,255));A.put("SNOW",types.color(255,250,250,255));A.put("CHOCOLATE",types.color(210,105,30,255));A.put("SADDLEBROWN",types.color(139,69,19,255));A.put("BROWN",types.color(132,60,36,255));A.put("LIGHTBROWN",types.color(183,111,87,255));A.put("MEDIUMBROWN",types.color(132,60,36,255));A.put("DARKBROWN",
@@ -312,7 +314,105 @@ types.color(175,238,238,255));A.put("ALICEBLUE",types.color(240,248,255,255));A.
 types.color(106,90,205,255));A.put("PURPLE",types.color(160,32,240,255));A.put("LIGHTPURPLE",types.color(211,83,255,255));A.put("MEDIUMPURPLE",types.color(147,112,219,255));A.put("DARKPURPLE",types.color(109,0,189,255));A.put("DARKSLATEBLUE",types.color(72,61,139,255));A.put("DARKVIOLET",types.color(148,0,211,255));A.put("DARKORCHID",types.color(153,50,204,255));A.put("MEDIUMORCHID",types.color(186,85,211,255));A.put("MAGENTA",types.color(255,0,255,255));A.put("FUCHSIA",types.color(255,0,255,255));
 A.put("DARKMAGENTA",types.color(139,0,139,255));A.put("VIOLET",types.color(238,130,238,255));A.put("PLUM",types.color(221,160,221,255));A.put("LAVENDER",types.color(230,230,250,255));A.put("THISTLE",types.color(216,191,216,255));A.put("GHOSTWHITE",types.color(248,248,255,255));A.put("WHITE",types.color(255,255,255,255));A.put("WHITESMOKE",types.color(245,245,245,255));A.put("GAINSBORO",types.color(220,220,220,255));A.put("LIGHTGRAY",types.color(211,211,211,255));A.put("LIGHTGREY",types.color(211,
 211,211,255));A.put("SILVER",types.color(192,192,192,255));A.put("GRAY",types.color(190,190,190,255));A.put("GREY",types.color(190,190,190,255));A.put("MEDIUMGRAY",types.color(190,190,190,255));A.put("MEDIUMGREY",types.color(190,190,190,255));A.put("DARKGRAY",types.color(169,169,169,255));A.put("DARKGREY",types.color(169,169,169,255));A.put("DIMGRAY",types.color(105,105,105,255));A.put("DIMGREY",types.color(105,105,105,255));A.put("BLACK",types.color(0,0,0,255));A.put("TRANSPARENT",types.color(0,
-0,0,0));v=[];ca=A.colors;for(var Fa in ca)if(ca.hasOwnProperty(Fa)){var da=b(types.colorRed(ca[Fa]),types.colorGreen(ca[Fa]),types.colorBlue(ca[Fa]));v.push({name:Fa,l:da.l,a:da.a,b:da.b})}world.Kernel.isImage=function(b){return null!==b&&void 0!==b&&b instanceof B};world.Kernel.isScene=function(b){return void 0!==b&&null!==b&&b instanceof aa};world.Kernel.isColor=function(b){return types.isColor(b)||(types.isString(b)||types.isSymbol(b))&&"undefined"!==typeof A.get(b)};world.Kernel.nameToColor=function(b){return A.get(""+
+0,0,0));
+
+A.put("ALICE-BLUE", types.color(240, 248, 255, 1));
+A.put("ANTIQUE-WHITE", types.color(250, 235, 215, 1));
+A.put("BLANCHED-ALMOND", types.color(255, 235, 205, 1));
+A.put("BLUE-VIOLET", types.color(138, 43, 226, 1));
+A.put("CADET-BLUE", types.color(95, 158, 160, 1));
+A.put("CORNFLOWER-BLUE", types.color(100, 149, 237, 1));
+A.put("DARK-BLUE", types.color(0, 0, 139, 1));
+A.put("DARK-CYAN", types.color(0, 139, 139, 1));
+A.put("DARK-GOLDENROD", types.color(184, 134, 11, 1));
+A.put("DARK-GRAY", types.color(169, 169, 169, 1));
+A.put("DARK-GREEN", types.color(0, 100, 0, 1));
+A.put("DARK-GREY", types.color(169, 169, 169, 1));
+A.put("DARK-KHAKI", types.color(189, 183, 107, 1));
+A.put("DARK-MAGENTA", types.color(139, 0, 139, 1));
+A.put("DARK-OLIVE-GREEN", types.color(85, 107, 47, 1));
+A.put("DARK-ORANGE", types.color(255, 140, 0, 1));
+A.put("DARK-ORCHID", types.color(153, 50, 204, 1));
+A.put("DARK-RED", types.color(139, 0, 0, 1));
+A.put("DARK-SALMON", types.color(233, 150, 122, 1));
+A.put("DARK-SEA-GREEN", types.color(143, 188, 139, 1));
+A.put("DARK-SLATE-BLUE", types.color(72, 61, 139, 1));
+A.put("DARK-SLATE-GRAY", types.color(47, 79, 79, 1));
+A.put("DARK-SLATE-GREY", types.color(47, 79, 79, 1));
+A.put("DARK-TURQUOISE", types.color(0, 206, 209, 1));
+A.put("DARK-VIOLET", types.color(148, 0, 211, 1));
+A.put("DEEP-PINK", types.color(255, 20, 147, 1));
+A.put("DEEP-SKY-BLUE", types.color(0, 191, 255, 1));
+A.put("DIM-GRAY", types.color(105, 105, 105, 1));
+A.put("DIM-GREY", types.color(105, 105, 105, 1));
+A.put("DODGER-BLUE", types.color(30, 144, 255, 1));
+A.put("FIRE-BRICK", types.color(178, 34, 34, 1));
+A.put("FLORAL-WHITE", types.color(255, 250, 240, 1));
+A.put("FOREST-GREEN", types.color(34, 139, 34, 1));
+A.put("GHOST-WHITE", types.color(248, 248, 255, 1));
+A.put("GREEN-YELLOW", types.color(173, 255, 47, 1));
+A.put("HOT-PINK", types.color(255, 105, 180, 1));
+A.put("INDIAN-RED", types.color(205, 92, 92, 1));
+A.put("LAVENDER-BLUSH", types.color(255, 240, 245, 1));
+A.put("LAWN-GREEN", types.color(124, 252, 0, 1));
+A.put("LEMON-CHIFFON", types.color(255, 250, 205, 1));
+A.put("LIGHT-BLUE", types.color(173, 216, 230, 1));
+A.put("LIGHT-CORAL", types.color(240, 128, 128, 1));
+A.put("LIGHT-CYAN", types.color(224, 255, 255, 1));
+A.put("LIGHT-GOLDENROD-YELLOW", types.color(250, 250, 210, 1));
+A.put("LIGHT-GRAY", types.color(211, 211, 211, 1));
+A.put("LIGHT-GREEN", types.color(144, 238, 144, 1));
+A.put("LIGHT-GREY", types.color(211, 211, 211, 1));
+A.put("LIGHT-PINK", types.color(255, 182, 193, 1));
+A.put("LIGHT-SALMON", types.color(255, 160, 122, 1));
+A.put("LIGHT-SEA-GREEN", types.color(32, 178, 170, 1));
+A.put("LIGHT-SKY-BLUE", types.color(135, 206, 250, 1));
+A.put("LIGHT-SLATE-GRAY", types.color(119, 136, 153, 1));
+A.put("LIGHT-SLATE-GREY", types.color(119, 136, 153, 1));
+A.put("LIGHT-STEEL-BLUE", types.color(176, 196, 222, 1));
+A.put("LIGHT-YELLOW", types.color(255, 255, 224, 1));
+A.put("LIME-GREEN", types.color(50, 205, 50, 1));
+A.put("MEDIUM-AQUAMARINE", types.color(102, 205, 170, 1));
+A.put("MEDIUM-BLUE", types.color(0, 0, 205, 1));
+A.put("MEDIUM-FOREST-GREEN", types.color(107, 142, 35, 1));
+A.put("MEDIUM-GOLDENROD", types.color(234, 234, 173, 1));
+A.put("MEDIUM-ORCHID", types.color(186, 85, 211, 1));
+A.put("MEDIUM-PURPLE", types.color(147, 112, 219, 1));
+A.put("MEDIUM-SEA-GREEN", types.color(60, 179, 113, 1));
+A.put("MEDIUM-SLATE-BLUE", types.color(123, 104, 238, 1));
+A.put("MEDIUM-SPRING-GREEN", types.color(0, 250, 154, 1));
+A.put("MEDIUM-TURQUOISE", types.color(72, 209, 204, 1));
+A.put("MEDIUM-VIOLET-RED", types.color(199, 21, 133, 1));
+A.put("MIDNIGHT-BLUE", types.color(25, 25, 112, 1));
+A.put("MINT-CREAM", types.color(245, 255, 250, 1));
+A.put("MISTY-ROSE", types.color(255, 228, 225, 1));
+A.put("NAVAJO-WHITE", types.color(255, 222, 173, 1));
+A.put("OLD-LACE", types.color(253, 245, 230, 1));
+A.put("OLIVE-DRAB", types.color(107, 142, 35, 1));
+A.put("ORANGE-RED", types.color(255, 69, 0, 1));
+A.put("PALE-GOLDENROD", types.color(238, 232, 170, 1));
+A.put("PALE-GREEN", types.color(152, 251, 152, 1));
+A.put("PALE-TURQUOISE", types.color(175, 238, 238, 1));
+A.put("PALE-VIOLET-RED", types.color(219, 112, 147, 1));
+A.put("PAPAYA-WHIP", types.color(255, 239, 213, 1));
+A.put("PEACH-PUFF", types.color(255, 218, 185, 1));
+A.put("POWDER-BLUE", types.color(176, 224, 230, 1));
+A.put("ROSY-BROWN", types.color(188, 143, 143, 1));
+A.put("ROYAL-BLUE", types.color(65, 105, 225, 1));
+A.put("SADDLE-BROWN", types.color(139, 69, 19, 1));
+A.put("SANDY-BROWN", types.color(244, 164, 96, 1));
+A.put("SEA-GREEN", types.color(46, 139, 87, 1));
+A.put("SKY-BLUE", types.color(135, 206, 235, 1));
+A.put("SLATE-BLUE", types.color(106, 90, 205, 1));
+A.put("SLATE-GRAY", types.color(112, 128, 144, 1));
+A.put("SLATE-GREY", types.color(112, 128, 144, 1));
+A.put("SPRING-GREEN", types.color(0, 255, 127, 1));
+A.put("STEEL-BLUE", types.color(70, 130, 180, 1));
+A.put("VIOLET-RED", types.color(208, 32, 144, 1));
+A.put("WHITE-SMOKE", types.color(245, 245, 245, 1));
+A.put("YELLOW-GREEN", types.color(154, 205, 50, 1));
+
+v=[];ca=A.colors;for(var Fa in ca)if(ca.hasOwnProperty(Fa)){var da=b(types.colorRed(ca[Fa]),types.colorGreen(ca[Fa]),types.colorBlue(ca[Fa]));v.push({name:Fa,l:da.l,a:da.a,b:da.b})}world.Kernel.isImage=function(b){return null!==b&&void 0!==b&&b instanceof B};world.Kernel.isScene=function(b){return void 0!==b&&null!==b&&b instanceof aa};world.Kernel.isColor=function(b){return types.isColor(b)||(types.isString(b)||types.isSymbol(b))&&"undefined"!==typeof A.get(b)};world.Kernel.nameToColor=function(b){return A.get(""+
 b)};world.Kernel.colorDb=A;world.Kernel.colorLabs=v;world.Kernel.sceneImage=function(b,c,e,m,q){return new aa(b,c,e,m,q)};world.Kernel.circleImage=function(b,c,e){return new D(2*b,2*b,c,e)};world.Kernel.starImage=function(b,c,e,m,q){return new ia(b,c,e,m,q)};world.Kernel.rectangleImage=function(b,c,e,m){return new ra(b,c,e,m)};world.Kernel.rhombusImage=function(b,c,e,m){return new Y(b,c,e,m)};world.Kernel.polygonImage=function(b,c,e,m,q,v){return new N(b,c,e,m,q,v)};world.Kernel.posnImage=function(b,
 c,e){return new M(b,c,e)};world.Kernel.squareImage=function(b,c,e){return new ra(b,b,c,e)};world.Kernel.triangleImage=function(b,c,e,m,q){return new H(b,c,e,m,q)};world.Kernel.ellipseImage=function(b,c,e,m){return new D(b,c,e,m)};world.Kernel.lineImage=function(b,c,e){return new fa(b,c,e)};world.Kernel.overlayImage=function(b,c,e,m){return new K(b,c,e,m)};world.Kernel.rotateImage=function(b,c){return new W(b,c)};world.Kernel.scaleImage=function(b,c,e){return new pa(b,c,e)};world.Kernel.cropImage=
 function(b,c,e,m,q){return new la(b,c,e,m,q)};world.Kernel.frameImage=function(b){return new qa(b)};world.Kernel.flipImage=function(b,c){return new Z(b,c)};world.Kernel.textImage=function(b,c,e,m,q,v,u,y,A){return new ua(b,c,e,m,q,v,u,y,A)};world.Kernel.fileImage=function(b,c,e){return T.makeInstance(b,c,e)};world.Kernel.fileVideo=function(b,c){return na.makeInstance(b,c)};world.Kernel.fileAudio=function(b,c,e){return ea.makeInstance(b,c,e)};world.Kernel.isSceneImage=function(b){return b instanceof
@@ -457,8 +557,15 @@ types.isChar(c)&&(c=c.getValue());return d.toString().toLowerCase()===c.toString
 l(b,e,za,"make-color","exact number between 0 and 255",3,arguments);return types.color(jsnums.toFixnum(d),jsnums.toFixnum(c),jsnums.toFixnum(e))}),new c("make-color",4,!1,!1,function(b,d,c,e,h){l(b,d,za,"make-color","exact number between 0 and 255",1,arguments);l(b,c,za,"make-color","exact number between 0 and 255",2,arguments);l(b,e,za,"make-color","exact number between 0 and 255",3,arguments);l(b,h,za,"make-color","exact number between 0 and 255",4,arguments);return types.color(jsnums.toFixnum(d),
 jsnums.toFixnum(c),jsnums.toFixnum(e),jsnums.toFixnum(h))})]);b["color-red"]=new c("color-red",1,!1,!1,function(b,d){l(b,d,types.isColor,"color-red","color",1);return types.colorRed(d)});b["color-green"]=new c("color-green",1,!1,!1,function(b,d){l(b,d,types.isColor,"color-green","color",1);return types.colorGreen(d)});b["color-blue"]=new c("color-blue",1,!1,!1,function(b,d){l(b,d,types.isColor,"color-blue","color",1);return types.colorBlue(d)});b["color-alpha"]=new c("color-alpha",1,!1,!1,function(b,
 d){l(b,d,types.isColor,"color-alpha","color",1);return types.colorAlpha(d)});b["empty-scene"]=new v("empty-scene",[new c("empty-scene",2,!1,!1,function(b,d,c){l(b,d,D,"empty-scene","non-negative number",1,arguments);l(b,c,D,"empty-scene","non-negative number",2,arguments);var g=F.get("white");return world.Kernel.sceneImage(jsnums.toFixnum(d),jsnums.toFixnum(c),[],!0,g)}),new c("empty-scene",3,!1,!1,function(b,d,c,e){l(b,d,D,"empty-scene","non-negative number",1,arguments);l(b,c,D,"empty-scene","non-negative number",
-2,arguments);l(b,e,J,"empty-scene","color",3,arguments);F.get(e)&&(e=F.get(e));return world.Kernel.sceneImage(jsnums.toFixnum(d),jsnums.toFixnum(c),[],!0,e)})]);b["put-image"]=new c("put-image",4,!1,!1,function(b,d,c,e,h){l(b,d,I,"put-image","image",1,arguments);l(b,c,N,"put-image","real",2,arguments);l(b,e,N,"put-image","real",3,arguments);l(b,h,function(b){return Pa(b)||I(b)},"put-image","image",4,arguments);c=jsnums.toFixnum(c);e=jsnums.toFixnum(e);if(Pa(h))return h.add(d,c,h.getHeight()-e);var g=
-world.Kernel.sceneImage(h.getWidth(),h.getHeight(),[],!1,null);g=g.add(h,h.getWidth()/2,h.getHeight()/2);return g=g.add(d,c,h.getHeight()-e)});b["place-image"]=new c("place-image",4,!1,!1,function(b,d,c,e,h){l(b,d,I,"place-image","image",1,arguments);l(b,c,N,"place-image","real",2,arguments);l(b,e,N,"place-image","real",3,arguments);l(b,h,function(b){return Pa(b)||I(b)},"place-image","image",4,arguments);c=jsnums.toFixnum(c);e=jsnums.toFixnum(e);if(Pa(h))return h.add(d,c,e);var g=world.Kernel.sceneImage(h.getWidth(),
+2,arguments);l(b,e,J,"empty-scene","color",3,arguments);F.get(e)&&(e=F.get(e));return world.Kernel.sceneImage(jsnums.toFixnum(d),jsnums.toFixnum(c),[],!0,e)})]);
+
+b["put-image"]=new c("put-image",4,!1,!1,function(b,d,c,e,h){l(b,d,I,"put-image","image",1,arguments);l(b,c,N,"put-image","real",2,arguments);l(b,e,N,"put-image","real",3,arguments);l(b,h,function(b){return Pa(b)||I(b)},"put-image","image",4,arguments);c=jsnums.toFixnum(c);e=jsnums.toFixnum(e);if(Pa(h))return h.add(d,c,h.getHeight()-e);var g=
+world.Kernel.sceneImage(h.getWidth(),h.getHeight(),[],!1,null);g=g.add(h,h.getWidth()/2,h.getHeight()/2);return g=g.add(d,c,h.getHeight()-e)});
+
+b["translate"]=new c("translate",4,!1,!1,function(b,d,c,e,h){l(b,d,I,"translate","image",1,arguments);l(b,c,N,"translate","real",2,arguments);l(b,e,N,"translate","real",3,arguments);l(b,h,function(b){return Pa(b)||I(b)},"translate","image",4,arguments);c=jsnums.toFixnum(c);e=jsnums.toFixnum(e);if(Pa(h))return h.add(d,c,h.getHeight()-e);var g=
+world.Kernel.sceneImage(h.getWidth(),h.getHeight(),[],!1,null);g=g.add(h,h.getWidth()/2,h.getHeight()/2);return g=g.add(d,c,h.getHeight()-e)});
+
+b["place-image"]=new c("place-image",4,!1,!1,function(b,d,c,e,h){l(b,d,I,"place-image","image",1,arguments);l(b,c,N,"place-image","real",2,arguments);l(b,e,N,"place-image","real",3,arguments);l(b,h,function(b){return Pa(b)||I(b)},"place-image","image",4,arguments);c=jsnums.toFixnum(c);e=jsnums.toFixnum(e);if(Pa(h))return h.add(d,c,e);var g=world.Kernel.sceneImage(h.getWidth(),
 h.getHeight(),[],!1,null);g=g.add(h,h.getWidth()/2,h.getHeight()/2);return g=g.add(d,c,e)});b["place-image/align"]=new c("place-image/align",6,!1,!1,function(b,d,c,e,h,k,m){l(b,d,I,"place-image/align","image",1,arguments);l(b,c,N,"place-image/align","real number",2,arguments);l(b,e,N,"place-image/align","real number",3,arguments);l(b,h,Ua,"place-image/align","x-place",4,arguments);l(b,k,Oa,"place-image/align","y-place",5,arguments);l(b,m,function(b){return Pa(b)||I(b)},"place-image/align","image",
 6,arguments);c=jsnums.toFixnum(c);e=jsnums.toFixnum(e);"left"==h?c+=d.getWidth()/2:"right"==h&&(c-=d.getWidth()/2);"top"==k?e+=d.getHeight()/2:"bottom"==k&&(e-=d.getHeight()/2);if(Pa(m))return m.add(d,c,e);var g=world.Kernel.sceneImage(m.getWidth(),m.getHeight(),[],!1,null);g=g.add(m,m.getWidth()/2,m.getHeight()/2);return g=g.add(d,c,e)});b["scene+line"]=new c("scene+line",6,!1,!1,function(b,d,c,e,h,k,m){l(b,d,I,"scene+line","image",1,arguments);l(b,c,N,"scene+line","finite real number",2,arguments);
 l(b,e,N,"scene+line","finite real number",3,arguments);l(b,h,N,"scene+line","finite real number",4,arguments);l(b,k,N,"scene+line","finite real number",5,arguments);l(b,m,J,"scene+line","color",6,arguments);F.get(m)&&(m=F.get(m));newScene=world.Kernel.sceneImage(jsnums.toFixnum(d.getWidth()),jsnums.toFixnum(d.getHeight()),[],!1,null);newScene=newScene.add(d,d.getWidth()/2,d.getHeight()/2);line=world.Kernel.lineImage(jsnums.toFixnum(h-c),jsnums.toFixnum(k-e),m);leftMost=Math.min(c,h);topMost=Math.min(e,
@@ -498,8 +605,17 @@ world.Kernel.overlayImage(e[h],g,"middle","middle");return g});b["underlay/xy"]=
 "image",2,arguments);S(e,function(d,c){l(b,d,I,"beside","image",c+4)},arguments);for(var g=world.Kernel.overlayImage(d,c,"beside","middle"),h=0;h<e.length;h++)g=world.Kernel.overlayImage(g,e[h],"beside","middle");return g});b["beside/align"]=new c("beside/align",3,!0,!1,function(b,d,c,e,h){Ha(b,d,Oa,"beside/align","y-place",1,arguments);Ha(b,c,I,"beside/align","image",2,arguments);Ha(b,e,I,"beside/align","image",3,arguments);S(h,function(d,c){l(b,d,I,"beside","image",c+3)},arguments);for(var g=world.Kernel.overlayImage(c,
 e,"beside",d.toString()),k=0;k<h.length;k++)g=world.Kernel.overlayImage(g,h[k],"beside",d.toString());return g});b.above=new c("above",2,!0,!1,function(b,d,c,e){Ha(b,d,I,"above","image",1,arguments);Ha(b,c,I,"above","image",2,arguments);S(e,function(d,c){l(b,d,I,"above","image",c+4)},arguments);for(var g=world.Kernel.overlayImage(d,c,"middle","above"),h=0;h<e.length;h++)g=world.Kernel.overlayImage(g,e[h],"middle","above");return g});b["above/align"]=new c("above/align",3,!0,!1,function(b,d,c,e,h){Ha(b,
 d,Ua,"above/align","x-place",1,arguments);Ha(b,c,I,"above/align","image",1,arguments);Ha(b,e,I,"above/align","image",2,arguments);S(h,function(d,c){l(b,d,I,"above/align","image",c+4)},arguments);var g,k=world.Kernel.overlayImage(c,e,d.toString(),"above");for(g=0;g<h.length;g++)k=world.Kernel.overlayImage(k,h[g],d.toString(),"above");return k});b.rotate=new c("rotate",2,!1,!1,function(b,d,c){l(b,d,N,"rotate","finite real number",1,arguments);l(b,c,I,"rotate","image",2,arguments);d=jsnums.toFixnum(d)%
-360;return world.Kernel.rotateImage(-1*d,c)});b["scale/xy"]=new c("scale/xy",3,!1,!1,function(b,d,c,e){l(b,d,D,"scale/xy","non-negative number",1,arguments);l(b,c,D,"scale/xy","non-negative number",2,arguments);l(b,e,I,"scale/xy","image",3,arguments);return world.Kernel.scaleImage(jsnums.toFixnum(d),jsnums.toFixnum(c),e)});b.scale=new c("scale",2,!1,!1,function(b,d,c){l(b,d,D,"scale","non-negative number",1,arguments);l(b,c,I,"scale","image",2,arguments);return world.Kernel.scaleImage(jsnums.toFixnum(d),
-jsnums.toFixnum(d),c)});b.crop=new c("crop",5,!1,!1,function(b,d,c,e,h,k){l(b,d,N,"crop","finite real number",1,arguments);l(b,c,N,"crop","finite real number",2,arguments);l(b,e,D,"crop","non-negative number",3,arguments);l(b,h,D,"crop","non-negative number",4,arguments);l(b,k,I,"crop","image",5,arguments);return world.Kernel.cropImage(jsnums.toFixnum(d),jsnums.toFixnum(c),jsnums.toFixnum(e),jsnums.toFixnum(h),k)});b.frame=new c("frame",1,!1,!1,function(b,d){l(b,d,I,"frame","image",1,arguments);return world.Kernel.frameImage(d)});
+360;return world.Kernel.rotateImage(-1*d,c)});
+
+b["scale/xy"]=new c("scale/xy",3,!1,!1,function(b,d,c,e){l(b,d,D,"scale/xy","non-negative number",1,arguments);l(b,c,D,"scale/xy","non-negative number",2,arguments);l(b,e,I,"scale/xy","image",3,arguments);return world.Kernel.scaleImage(jsnums.toFixnum(d),jsnums.toFixnum(c),e)});
+
+b.scale=new c("scale",2,!1,!1,function(b,d,c){l(b,d,D,"scale","non-negative number",1,arguments);l(b,c,I,"scale","image",2,arguments);return world.Kernel.scaleImage(jsnums.toFixnum(d),
+jsnums.toFixnum(d),c)});
+
+b.dilate=new c("dilate",2,!1,!1,function(b,d,c){l(b,d,D,"dilate","non-negative number",1,arguments);l(b,c,I,"dilate","image",2,arguments);return world.Kernel.scaleImage(jsnums.toFixnum(d),
+jsnums.toFixnum(d),c)});
+
+b.crop=new c("crop",5,!1,!1,function(b,d,c,e,h,k){l(b,d,N,"crop","finite real number",1,arguments);l(b,c,N,"crop","finite real number",2,arguments);l(b,e,D,"crop","non-negative number",3,arguments);l(b,h,D,"crop","non-negative number",4,arguments);l(b,k,I,"crop","image",5,arguments);return world.Kernel.cropImage(jsnums.toFixnum(d),jsnums.toFixnum(c),jsnums.toFixnum(e),jsnums.toFixnum(h),k)});b.frame=new c("frame",1,!1,!1,function(b,d){l(b,d,I,"frame","image",1,arguments);return world.Kernel.frameImage(d)});
 b["flip-vertical"]=new c("flip-vertical",1,!1,!1,function(b,d){l(b,d,I,"flip-vertical","image",1,arguments);return world.Kernel.flipImage(d,"vertical")});b["flip-horizontal"]=new c("flip-horizontal",1,!1,!1,function(b,d){l(b,d,I,"flip-horizontal","image",1,arguments);return world.Kernel.flipImage(d,"horizontal")});b["reflect-x"]=new c("reflect-x",1,!1,!1,function(b,d){l(b,d,I,"reflect-x","image",1,arguments);return world.Kernel.flipImage(d,"vertical")});b["reflect-y"]=new c("reflect-y",1,!1,!1,function(b,
 d){l(b,d,I,"reflect-y","image",1,arguments);return world.Kernel.flipImage(d,"horizontal")});b.text=new c("text",3,!1,!1,function(b,d,c,e){l(b,d,w,"text","string",1,arguments);l(b,c,function(b){return H(b)&&jsnums.greaterThan(b,0)&&za(b)},"text","exact integer between 1 and 255",2,arguments);l(b,e,J,"text","color",3,arguments);F.get(e)&&(e=F.get(e));return world.Kernel.textImage(d.toString(),jsnums.toFixnum(c),e,"normal","Arial","","",!1)});b["text/font"]=new v("text/font",[new c("text/font",8,!1,
 !1,function(b,d,c,e,h,k,m,q,v){l(b,d,w,"text/font","string",1,arguments);l(b,c,function(b){return H(b)&&jsnums.greaterThan(b,0)&&za(b)},"text/font","exact integer between 1 and 255",2,arguments);l(b,e,J,"text/font","color",3,arguments);l(b,h,function(b){return w(b)||!b},"text/font","face",4,arguments);l(b,k,Da,"text/font","family",5,arguments);l(b,m,$a,"text/font",'style ("solid" or "outline")',6,arguments);l(b,q,z,"text/font","weight",7,arguments);l(b,v,Aa,"text/font","underline?",8,arguments);F.get(e)&&
